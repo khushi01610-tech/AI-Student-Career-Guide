@@ -1,0 +1,314 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 220 30% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 10%;
+
+    --primary: 245 58% 51%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 93%;
+    --secondary-foreground: 220 30% 20%;
+
+    --muted: 220 14% 93%;
+    --muted-foreground: 220 10% 46%;
+
+    --accent: 170 60% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 89%;
+    --input: 220 13% 89%;
+    --ring: 245 58% 51%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 220 30% 10%;
+    --sidebar-foreground: 220 14% 80%;
+    --sidebar-primary: 245 58% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 25% 16%;
+    --sidebar-accent-foreground: 220 14% 90%;
+    --sidebar-border: 220 25% 18%;
+    --sidebar-ring: 245 58% 51%;
+
+    --chart-1: 245 58% 51%;
+    --chart-2: 170 60% 45%;
+    --chart-3: 32 95% 55%;
+    --chart-4: 340 65% 55%;
+    --chart-5: 200 70% 50%;
+  }
+
+  .dark {
+    --background: 220 30% 6%;
+    --foreground: 220 14% 93%;
+
+    --card: 220 25% 10%;
+    --card-foreground: 220 14% 93%;
+
+    --popover: 220 25% 10%;
+    --popover-foreground: 220 14% 93%;
+
+    --primary: 245 58% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 25% 16%;
+    --secondary-foreground: 220 14% 90%;
+
+    --muted: 220 25% 16%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 170 60% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 25% 18%;
+    --input: 220 25% 18%;
+    --ring: 245 58% 60%;
+
+    --sidebar-background: 220 30% 6%;
+    --sidebar-foreground: 220 14% 80%;
+    --sidebar-primary: 245 58% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 25% 12%;
+    --sidebar-accent-foreground: 220 14% 90%;
+    --sidebar-border: 220 25% 14%;
+    --sidebar-ring: 245 58% 60%;
+
+    --chart-1: 245 58% 60%;
+    --chart-2: 170 60% 50%;
+    --chart-3: 32 95% 60%;
+    --chart-4: 340 65% 60%;
+    --chart-5: 200 70% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  }
+
+  ::selection {
+    background: hsla(var(--primary), 0.3);
+    color: hsl(var(--foreground));
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsla(var(--muted-foreground), 0.3);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsla(var(--muted-foreground), 0.5);
+  }
+}
+
+@layer utilities {
+  .animate-count-up {
+    animation: countUp 1.5s ease-out forwards;
+  }
+
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50 shadow-xl;
+    background: linear-gradient(
+      135deg,
+      hsla(var(--card), 0.9) 0%,
+      hsla(var(--card), 0.7) 100%
+    );
+  }
+
+  .glass-card:hover {
+    border-color: hsla(var(--primary), 0.2);
+    box-shadow: 0 8px 32px -8px hsla(var(--primary), 0.15),
+                0 4px 16px -4px hsla(var(--foreground), 0.05);
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--chart-4)));
+    background-size: 200% 200%;
+    animation: gradientShift 4s ease-in-out infinite;
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 20px hsla(var(--primary), 0.4),
+                0 0 60px hsla(var(--primary), 0.1),
+                inset 0 1px 0 hsla(0, 0%, 100%, 0.1);
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 20px hsla(var(--accent), 0.4),
+                0 0 60px hsla(var(--accent), 0.1);
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsla(var(--primary), 0.06) 30%,
+      hsla(var(--accent), 0.08) 50%,
+      hsla(var(--primary), 0.06) 70%,
+      transparent 100%
+    );
+    background-size: 300% 100%;
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -300% 0; }
+    100% { background-position: 300% 0; }
+  }
+
+  .pulse-dot {
+    animation: pulseDot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseDot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+  }
+
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .aurora {
+    background: linear-gradient(
+      45deg,
+      hsla(var(--primary), 0.05) 0%,
+      hsla(var(--accent), 0.05) 25%,
+      hsla(var(--chart-4), 0.05) 50%,
+      hsla(var(--chart-5), 0.05) 75%,
+      hsla(var(--primary), 0.05) 100%
+    );
+    background-size: 400% 400%;
+    animation: aurora 8s ease-in-out infinite;
+  }
+
+  @keyframes aurora {
+    0%, 100% { background-position: 0% 50%; }
+    25% { background-position: 50% 0%; }
+    50% { background-position: 100% 50%; }
+    75% { background-position: 50% 100%; }
+  }
+
+  .neon-border {
+    position: relative;
+  }
+  .neon-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--chart-4)));
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .neon-border:hover::before {
+    opacity: 0.5;
+  }
+
+  .mesh-gradient {
+    background:
+      radial-gradient(at 20% 30%, hsla(var(--primary), 0.08) 0%, transparent 50%),
+      radial-gradient(at 80% 20%, hsla(var(--accent), 0.08) 0%, transparent 50%),
+      radial-gradient(at 50% 80%, hsla(var(--chart-4), 0.06) 0%, transparent 50%),
+      radial-gradient(at 90% 90%, hsla(var(--chart-5), 0.05) 0%, transparent 50%);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px hsla(var(--primary), 0.5),
+                 0 0 40px hsla(var(--primary), 0.2);
+  }
+
+  .card-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .card-shine::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      transparent 40%,
+      hsla(var(--primary), 0.03) 45%,
+      hsla(var(--primary), 0.06) 50%,
+      hsla(var(--primary), 0.03) 55%,
+      transparent 60%
+    );
+    animation: shine 6s ease-in-out infinite;
+  }
+
+  @keyframes shine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  }
+
+  .particle-bg {
+    background-image:
+      radial-gradient(2px 2px at 10% 20%, hsla(var(--primary), 0.15) 50%, transparent 50%),
+      radial-gradient(2px 2px at 30% 60%, hsla(var(--accent), 0.1) 50%, transparent 50%),
+      radial-gradient(1px 1px at 50% 10%, hsla(var(--chart-3), 0.15) 50%, transparent 50%),
+      radial-gradient(2px 2px at 70% 40%, hsla(var(--primary), 0.1) 50%, transparent 50%),
+      radial-gradient(1px 1px at 90% 80%, hsla(var(--accent), 0.12) 50%, transparent 50%),
+      radial-gradient(1px 1px at 15% 85%, hsla(var(--chart-5), 0.12) 50%, transparent 50%),
+      radial-gradient(2px 2px at 60% 90%, hsla(var(--chart-4), 0.08) 50%, transparent 50%),
+      radial-gradient(1px 1px at 85% 15%, hsla(var(--primary), 0.1) 50%, transparent 50%);
+  }
+
+  .resume-preview {
+    background: linear-gradient(180deg, hsl(var(--background)) 0%, hsla(var(--card), 0.5) 100%);
+    border-left: 3px solid hsl(var(--primary));
+  }
+}
