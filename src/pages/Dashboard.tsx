@@ -29,7 +29,13 @@ import {
   Calendar, 
   BookOpen, 
   BrainCircuit, 
-  ChevronRight 
+  ChevronRight,
+  Building2,
+  CheckSquare,
+  GraduationCap,
+  FolderArchive,
+  Send,
+  ExternalLink
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -181,6 +187,114 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Campus Placement & Career Readiness Hub */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" /> Campus Placement Command Center
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Everything you need for upcoming on-campus drives, off-campus referrals, and technical rounds.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Company Archives */}
+          <Card 
+            onClick={() => navigate("/companies")}
+            className="group cursor-pointer hover:border-primary/50 transition-all hover:shadow-md border-border/60 bg-card/60 hover:-translate-y-0.5"
+          >
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600">
+                  <Building2 className="h-5 w-5" />
+                </div>
+                <Badge variant="outline" className="text-[10px] text-muted-foreground group-hover:text-primary">
+                  Explore
+                </Badge>
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">Company Blueprints</h3>
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                  Hiring patterns, CGPA cutoffs, and real interview rounds for Google, Amazon, Deloitte & more.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 2: Application Tracker */}
+          <Card 
+            onClick={() => navigate("/applications")}
+            className="group cursor-pointer hover:border-emerald-500/50 transition-all hover:shadow-md border-border/60 bg-card/60 hover:-translate-y-0.5"
+          >
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600">
+                  <CheckSquare className="h-5 w-5" />
+                </div>
+                <Badge variant="outline" className="text-[10px] text-muted-foreground group-hover:text-emerald-600">
+                  Pipeline
+                </Badge>
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm group-hover:text-emerald-600 transition-colors">Application Tracker</h3>
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                  Organize your applications from Wishlist to Online Assessment, Technical Interview, and Offers.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 3: Alumni Mentorship */}
+          <Card 
+            onClick={() => navigate("/mentors")}
+            className="group cursor-pointer hover:border-violet-500/50 transition-all hover:shadow-md border-border/60 bg-card/60 hover:-translate-y-0.5"
+          >
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="p-2 rounded-lg bg-violet-500/10 text-violet-600">
+                  <GraduationCap className="h-5 w-5" />
+                </div>
+                <Badge variant="outline" className="text-[10px] text-muted-foreground group-hover:text-violet-600">
+                  1:1 Chats
+                </Badge>
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm group-hover:text-violet-600 transition-colors">Alumni Mentorship</h3>
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                  Book 1:1 guidance and resume roast sessions with verified alumni at top tech firms.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 4: Placement Vault */}
+          <Card 
+            onClick={() => navigate("/vault")}
+            className="group cursor-pointer hover:border-amber-500/50 transition-all hover:shadow-md border-border/60 bg-card/60 hover:-translate-y-0.5"
+          >
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600">
+                  <FolderArchive className="h-5 w-5" />
+                </div>
+                <Badge variant="outline" className="text-[10px] text-muted-foreground group-hover:text-amber-600">
+                  Templates
+                </Badge>
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm group-hover:text-amber-600 transition-colors">Placement Vault</h3>
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                  Battle-tested cold email templates, SQL & DSA cheatsheets, and XYZ bullet generators.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Analytics Charts & Collab Grid */}

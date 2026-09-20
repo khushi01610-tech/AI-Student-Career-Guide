@@ -321,5 +321,71 @@ export const api = {
         method: "PUT",
         headers: getHeaders()
       }).then(handleResponse)
+  },
+
+  // Company Placement Archives
+  companies: {
+    get: (params?: { search?: string; industry?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.search) query.append("search", params.search);
+      if (params?.industry && params.industry !== "All") query.append("industry", params.industry);
+      return fetch(`${API_BASE_URL}/companies?${query.toString()}`, {
+        method: "GET",
+        headers: getHeaders()
+      }).then(handleResponse);
+    },
+    getBySlug: (slug: string) =>
+      fetch(`${API_BASE_URL}/companies/${slug}`, {
+        method: "GET",
+        headers: getHeaders()
+      }).then(handleResponse)
+  },
+
+  // Placement Applications Tracker
+  applications: {
+    get: () =>
+      fetch(`${API_BASE_URL}/applications`, {
+        method: "GET",
+        headers: getHeaders()
+      }).then(handleResponse),
+
+    create: (data: any) =>
+      fetch(`${API_BASE_URL}/applications`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+      }).then(handleResponse),
+
+    update: (id: string, data: any) =>
+      fetch(`${API_BASE_URL}/applications/${id}`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+      }).then(handleResponse),
+
+    delete: (id: string) =>
+      fetch(`${API_BASE_URL}/applications/${id}`, {
+        method: "DELETE",
+        headers: getHeaders()
+      }).then(handleResponse)
+  },
+
+  // Alumni Mentorship
+  mentors: {
+    get: (params?: { domain?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.domain && params.domain !== "All") query.append("domain", params.domain);
+      return fetch(`${API_BASE_URL}/mentors?${query.toString()}`, {
+        method: "GET",
+        headers: getHeaders()
+      }).then(handleResponse);
+    },
+
+    book: (id: string, bookingData: { slotDate: string; topic?: string }) =>
+      fetch(`${API_BASE_URL}/mentors/${id}/book`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(bookingData)
+      }).then(handleResponse)
   }
 };

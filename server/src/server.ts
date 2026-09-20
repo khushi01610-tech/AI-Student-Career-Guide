@@ -16,6 +16,9 @@ import postRoutes from "./routes/postRoutes";
 import videoRoutes from "./routes/videoRoutes";
 import sessionRoutes from "./routes/sessionRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
+import companyRoutes from "./routes/companyRoutes";
+import applicationRoutes from "./routes/applicationRoutes";
+import mentorRoutes from "./routes/mentorRoutes";
 
 dotenv.config();
 
@@ -47,6 +50,9 @@ app.use("/api/posts", postRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/collaboration", sessionRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/companies", companyRoutes);
+app.use("/api/applications", applicationRoutes);
+app.use("/api/mentors", mentorRoutes);
 
 // Health Check Route
 app.get("/api/health", (req, res) => {

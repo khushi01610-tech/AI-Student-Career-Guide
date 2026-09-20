@@ -25,6 +25,10 @@ import Community from "@/pages/Community";
 import Videos from "@/pages/Videos";
 import Collaboration from "@/pages/Collaboration";
 import Profile from "@/pages/Profile";
+import CompanyArchives from "@/pages/CompanyArchives";
+import ApplicationTracker from "@/pages/ApplicationTracker";
+import Mentorship from "@/pages/Mentorship";
+import CareerVault from "@/pages/CareerVault";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +51,10 @@ const MainRoutes = () => {
         
         {/* Protected Dashboard pages */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/companies" element={<ProtectedRoute><CompanyArchives /></ProtectedRoute>} />
+        <Route path="/applications" element={<ProtectedRoute><ApplicationTracker /></ProtectedRoute>} />
+        <Route path="/mentors" element={<ProtectedRoute><Mentorship /></ProtectedRoute>} />
+        <Route path="/vault" element={<ProtectedRoute><CareerVault /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><AICareerAssistant /></ProtectedRoute>} />
         <Route path="/interview" element={<ProtectedRoute><InterviewPrep /></ProtectedRoute>} />
         <Route path="/mock-interview" element={<ProtectedRoute><MockInterviewSystem /></ProtectedRoute>} />

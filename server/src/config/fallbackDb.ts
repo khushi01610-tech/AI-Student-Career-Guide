@@ -17,6 +17,9 @@ interface FallbackSchema {
   interviewAttempts: any[];
   communicationPractice: any[];
   resources: any[];
+  companies: any[];
+  mentors: any[];
+  applications: any[];
 }
 
 const defaultDb: FallbackSchema = {
@@ -31,7 +34,10 @@ const defaultDb: FallbackSchema = {
   mockInterviews: [],
   interviewAttempts: [],
   communicationPractice: [],
-  resources: []
+  resources: [],
+  companies: [],
+  mentors: [],
+  applications: []
 };
 
 // Initialize DB file if not exists
@@ -131,5 +137,13 @@ export const fallbackDb = {
     db[collectionName] = filtered;
     writeDb(db);
     return true;
+  },
+
+  update: (collectionName: keyof FallbackSchema, id: string, updates: any): any | null => {
+    return fallbackDb.findByIdAndUpdate(collectionName, id, updates);
+  },
+
+  delete: (collectionName: keyof FallbackSchema, id: string): boolean => {
+    return fallbackDb.findByIdAndDelete(collectionName, id);
   }
 };

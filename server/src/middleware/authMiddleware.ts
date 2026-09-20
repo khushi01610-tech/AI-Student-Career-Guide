@@ -26,3 +26,5 @@ export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: N
     return res.status(401).json({ message: "Token is not valid" });
   }
 };
+
+export const authenticateToken = authMiddleware;
