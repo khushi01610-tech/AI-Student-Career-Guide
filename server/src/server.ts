@@ -19,6 +19,7 @@ import notificationRoutes from "./routes/notificationRoutes";
 import companyRoutes from "./routes/companyRoutes";
 import applicationRoutes from "./routes/applicationRoutes";
 import mentorRoutes from "./routes/mentorRoutes";
+import jobRoutes from "./routes/jobRoutes";
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/mentors", mentorRoutes);
+app.use("/api/jobs", jobRoutes);
 
 // Health Check Route
 app.get("/api/health", (req, res) => {

@@ -387,5 +387,29 @@ export const api = {
         headers: getHeaders(),
         body: JSON.stringify(bookingData)
       }).then(handleResponse)
+  },
+
+  // Live Job Board (LinkedIn & Indeed)
+  jobs: {
+    getAll: (params?: { q?: string; location?: string; source?: string; type?: string; batch?: string; level?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.q) query.append("q", params.q);
+      if (params?.location) query.append("location", params.location);
+      if (params?.source && params.source !== "All") query.append("source", params.source);
+      if (params?.type && params.type !== "All") query.append("type", params.type);
+      if (params?.batch && params.batch !== "All") query.append("batch", params.batch);
+      if (params?.level && params.level !== "All") query.append("level", params.level);
+      return fetch(`${API_BASE_URL}/jobs?${query.toString()}`, {
+        method: "GET",
+        headers: getHeaders()
+      }).then(handleResponse);
+    },
+
+    getById: (id: string) =>
+      fetch(`${API_BASE_URL}/jobs/${id}`, {
+        method: "GET",
+        headers: getHeaders()
+      }).then(handleResponse)
   }
 };
+

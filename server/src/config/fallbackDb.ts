@@ -20,6 +20,7 @@ interface FallbackSchema {
   companies: any[];
   mentors: any[];
   applications: any[];
+  jobs: any[];
 }
 
 const defaultDb: FallbackSchema = {
@@ -37,7 +38,8 @@ const defaultDb: FallbackSchema = {
   resources: [],
   companies: [],
   mentors: [],
-  applications: []
+  applications: [],
+  jobs: []
 };
 
 // Initialize DB file if not exists

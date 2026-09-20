@@ -29,6 +29,7 @@ import CompanyArchives from "@/pages/CompanyArchives";
 import ApplicationTracker from "@/pages/ApplicationTracker";
 import Mentorship from "@/pages/Mentorship";
 import CareerVault from "@/pages/CareerVault";
+import JobSearch from "@/pages/JobSearch";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const MainRoutes = () => {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/companies" element={<ProtectedRoute><CompanyArchives /></ProtectedRoute>} />
         <Route path="/applications" element={<ProtectedRoute><ApplicationTracker /></ProtectedRoute>} />
+        <Route path="/jobs" element={<ProtectedRoute><JobSearch /></ProtectedRoute>} />
         <Route path="/mentors" element={<ProtectedRoute><Mentorship /></ProtectedRoute>} />
         <Route path="/vault" element={<ProtectedRoute><CareerVault /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><AICareerAssistant /></ProtectedRoute>} />

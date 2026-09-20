@@ -15,7 +15,8 @@ import {
   Coffee,
   FolderArchive,
   GraduationCap,
-  Bot
+  Bot,
+  Globe
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -53,6 +54,7 @@ const menuGroups = [
     label: "Applications & Strategy",
     items: [
       { title: "Application Tracker", url: "/applications", icon: Briefcase },
+      { title: "Jobs (LinkedIn/Indeed)", url: "/jobs", icon: Globe },
       { title: "Career Roadmaps", url: "/roadmap", icon: Compass },
     ]
   },

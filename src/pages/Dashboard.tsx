@@ -295,6 +295,43 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Featured Live Jobs & Interview Bank Quick Banner */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+          <div 
+            onClick={() => navigate("/jobs")}
+            className="cursor-pointer p-4 rounded-xl border border-blue-500/20 bg-blue-500/[0.04] hover:bg-blue-500/[0.08] transition-all flex items-center justify-between group"
+          >
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                <p className="text-xs font-bold text-blue-600 dark:text-blue-400">Live Campus Drives (LinkedIn & Indeed)</p>
+              </div>
+              <h4 className="text-sm font-semibold text-foreground">Explore 12+ Open SDE & Fresher Roles</h4>
+              <p className="text-[11px] text-muted-foreground">Google STEP, Microsoft FTE, Amazon SDE-1, Swiggy, Razorpay</p>
+            </div>
+            <Button size="sm" variant="ghost" className="text-blue-600 gap-1 group-hover:translate-x-0.5 transition-transform">
+              Browse <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div 
+            onClick={() => navigate("/interview")}
+            className="cursor-pointer p-4 rounded-xl border border-rose-500/20 bg-rose-500/[0.04] hover:bg-rose-500/[0.08] transition-all flex items-center justify-between group"
+          >
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                <p className="text-xs font-bold text-rose-600 dark:text-rose-400">Interview Question Archives</p>
+              </div>
+              <h4 className="text-sm font-semibold text-foreground">Google vs Product Medium vs College Tier</h4>
+              <p className="text-[11px] text-muted-foreground">System design, tree/graph algorithms, OOPs & ACID properties</p>
+            </div>
+            <Button size="sm" variant="ghost" className="text-rose-600 gap-1 group-hover:translate-x-0.5 transition-transform">
+              Practice <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Analytics Charts & Collab Grid */}

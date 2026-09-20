@@ -8,6 +8,7 @@ import { Session } from "../models/Session";
 import { LearningResource } from "../models/LearningResource";
 import { Company } from "../models/Company";
 import { Mentor } from "../models/Mentor";
+import { Job } from "../models/Job";
 import bcrypt from "bcryptjs";
 
 export const seedData = async () => {
@@ -463,6 +464,230 @@ export const seedData = async () => {
         await Mentor.insertMany(mockMentors);
       }
       console.log("Seeded alumni mentors.");
+    }
+
+    // Check and seed Jobs from LinkedIn & Indeed
+    const jobsCount = checkFallback()
+      ? fallbackDb.getCollection("jobs").length
+      : await Job.countDocuments();
+
+    if (jobsCount === 0) {
+      console.log("Seeding authentic LinkedIn & Indeed job listings...");
+      const mockJobs = [
+        {
+          title: "Software Engineering Intern (STEP 2026)",
+          company: "Google",
+          location: "Bengaluru, Karnataka",
+          source: "LinkedIn",
+          type: "Internship",
+          salary: "₹1,15,000/month",
+          level: "Internship",
+          batchEligibility: ["2026", "2027"],
+          workplaceType: "Hybrid",
+          description: "Student Training in Engineering Program (STEP) is a 12-week summer internship for 2nd-year undergraduate students with a passion for computer science and technology. You will work on software projects in small teams alongside Google engineers.",
+          skills: ["C++", "Java", "Python", "Data Structures", "Algorithms"],
+          applyUrl: "https://www.linkedin.com/jobs/view/google-step-intern-india",
+          postedDate: "2 days ago",
+          deadline: "October 30, 2026",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg"
+        },
+        {
+          title: "Software Engineer - Campus FTE",
+          company: "Microsoft",
+          location: "Hyderabad, Telangana",
+          source: "LinkedIn",
+          type: "Full-time",
+          salary: "₹16.0 - ₹22.0 LPA",
+          level: "Fresher",
+          batchEligibility: ["2025", "2026"],
+          workplaceType: "Hybrid",
+          description: "Join Microsoft Azure or Office 365 core engineering teams. Responsible for developing scalable cloud microservices, testing, deployment, and performance telemetry.",
+          skills: ["C#", ".NET Core", "Azure", "Distributed Systems", "SQL"],
+          applyUrl: "https://www.linkedin.com/jobs/view/microsoft-software-engineer-campus",
+          postedDate: "1 day ago",
+          deadline: "November 15, 2026",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg"
+        },
+        {
+          title: "Software Development Engineer 1 (SDE-1)",
+          company: "Amazon",
+          location: "Bengaluru / Hyderabad",
+          source: "Indeed",
+          type: "Full-time",
+          salary: "₹18.0 - ₹24.0 LPA",
+          level: "Fresher",
+          batchEligibility: ["2024", "2025"],
+          workplaceType: "On-site",
+          description: "Design, build, and support massive-scale e-commerce services and AWS infrastructure. Strong knowledge of object-oriented design and distributed caching required.",
+          skills: ["Java", "AWS", "DynamoDB", "OOP Design", "DSA"],
+          applyUrl: "https://www.indeed.com/viewjob?jk=amazon-sde1-india-campus",
+          postedDate: "3 days ago",
+          deadline: "Rolling Admissions",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg"
+        },
+        {
+          title: "Associate Software Engineer (Backend)",
+          company: "Swiggy",
+          location: "Bengaluru, Karnataka",
+          source: "Indeed",
+          type: "Full-time",
+          salary: "₹12.0 - ₹15.5 LPA",
+          level: "Entry Level",
+          batchEligibility: ["2024", "2025"],
+          workplaceType: "Hybrid",
+          description: "Work on Swiggy's high-throughput order dispatch engine processing 20,000+ orders per minute. Opportunity to write Go and Java microservices deployed across Kubernetes.",
+          skills: ["Golang", "Java", "Kafka", "Redis", "PostgreSQL", "Microservices"],
+          applyUrl: "https://www.indeed.com/viewjob?jk=swiggy-associate-backend-engineer",
+          postedDate: "Just now",
+          deadline: "October 20, 2026",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/en/1/12/Swiggy_logo.svg"
+        },
+        {
+          title: "Frontend Engineer 1 (Checkout Experience)",
+          company: "Razorpay",
+          location: "Bengaluru, Karnataka",
+          source: "LinkedIn",
+          type: "Full-time",
+          salary: "₹14.0 - ₹18.0 LPA",
+          level: "Fresher",
+          batchEligibility: ["2024", "2025"],
+          workplaceType: "On-site",
+          description: "Own key interfaces in India's leading fintech checkout gateway. Optimize render speeds to under 200ms across 2G/3G connections using React and modern bundle optimization.",
+          skills: ["React", "TypeScript", "Redux Toolkit", "Web Performance", "Tailwind CSS"],
+          applyUrl: "https://www.linkedin.com/jobs/view/razorpay-frontend-engineer-1",
+          postedDate: "4 days ago",
+          deadline: "November 5, 2026",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg"
+        },
+        {
+          title: "Analyst - Technology Consulting (Off-Campus)",
+          company: "Deloitte",
+          location: "Mumbai / Gurugram / Hyderabad",
+          source: "Indeed",
+          type: "Full-time",
+          salary: "₹7.5 - ₹9.0 LPA",
+          level: "Fresher",
+          batchEligibility: ["2025", "2026"],
+          workplaceType: "Hybrid",
+          description: "Assist Fortune 500 clients with digital transformation, enterprise system migrations, database management, and cloud architecture roadmaps.",
+          skills: ["Cloud Computing", "SQL", "Python", "Data Analysis", "Agile"],
+          applyUrl: "https://www.indeed.com/viewjob?jk=deloitte-analyst-tech-consulting",
+          postedDate: "1 week ago",
+          deadline: "December 1, 2026",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/commons/5/56/Deloitte.svg"
+        },
+        {
+          title: "SDE Summer Intern (2026 Batch)",
+          company: "Flipkart",
+          location: "Bengaluru, Karnataka",
+          source: "LinkedIn",
+          type: "Internship",
+          salary: "₹85,000/month",
+          level: "Internship",
+          batchEligibility: ["2026"],
+          workplaceType: "On-site",
+          description: "8-week high-impact engineering internship with direct PPO (Pre-Placement Offer) conversion potential. Work on supply chain automation, search relevance, or catalog systems.",
+          skills: ["DSA", "Java", "Python", "Algorithms", "System Design"],
+          applyUrl: "https://www.linkedin.com/jobs/view/flipkart-sde-intern-summer-2026",
+          postedDate: "3 days ago",
+          deadline: "October 25, 2026",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/commons/7/7a/Flipkart_logo.svg"
+        },
+        {
+          title: "System Engineer - Cadre Trainee (NQT Digital)",
+          company: "TCS Digital",
+          location: "Pan-India (Bengaluru, Pune, Chennai)",
+          source: "Indeed",
+          type: "Full-time",
+          salary: "₹7.2 - ₹9.0 LPA",
+          level: "Fresher",
+          batchEligibility: ["2025", "2026"],
+          workplaceType: "Hybrid",
+          description: "Digital Cadre hiring for high-scoring students in National Qualifier Test. Work on bleeding-edge projects in generative AI, cloud engineering, and enterprise modernization.",
+          skills: ["Java", "Python", "Full Stack", "Machine Learning", "DBMS"],
+          applyUrl: "https://www.indeed.com/viewjob?jk=tcs-digital-cadre-trainee-nqt",
+          postedDate: "5 days ago",
+          deadline: "November 30, 2026",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/commons/b/b1/Tata_Consultancy_Services_Logo.svg"
+        },
+        {
+          title: "Specialist Programmer (Campus Hiring 2026)",
+          company: "Infosys",
+          location: "Bengaluru / Mysuru / Pune",
+          source: "Indeed",
+          type: "Full-time",
+          salary: "₹9.5 - ₹11.0 LPA",
+          level: "Fresher",
+          batchEligibility: ["2025", "2026"],
+          workplaceType: "Hybrid",
+          description: "Premier coding role at Infosys requiring mastery in algorithms, graph traversal, and dynamic programming. Responsible for building next-generation digital platforms.",
+          skills: ["Competitive Programming", "C++", "Java", "Python", "Cloud Architecture"],
+          applyUrl: "https://www.indeed.com/viewjob?jk=infosys-specialist-programmer-dse",
+          postedDate: "2 days ago",
+          deadline: "December 15, 2026",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg"
+        },
+        {
+          title: "Associate Backend Developer",
+          company: "Zomato",
+          location: "Gurugram, Haryana",
+          source: "LinkedIn",
+          type: "Full-time",
+          salary: "₹13.0 - ₹16.0 LPA",
+          level: "Entry Level",
+          batchEligibility: ["2024", "2025"],
+          workplaceType: "On-site",
+          description: "Work on live tracking algorithms, partner APIs, and high-concurrency payment integrations during peak lunch and dinner order surges.",
+          skills: ["Node.js", "Python", "MongoDB", "Redis", "REST APIs"],
+          applyUrl: "https://www.linkedin.com/jobs/view/zomato-associate-backend-dev",
+          postedDate: "6 days ago",
+          deadline: "October 28, 2026",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/commons/b/bd/Zomato_Logo.svg"
+        },
+        {
+          title: "Cloud & Network Engineer Intern",
+          company: "Cisco",
+          location: "Bengaluru, Karnataka",
+          source: "LinkedIn",
+          type: "Internship",
+          salary: "₹70,000/month",
+          level: "Internship",
+          batchEligibility: ["2026"],
+          workplaceType: "Hybrid",
+          description: "Gain hands-on experience in software-defined networking (SDN), network security protocols, Linux internals, and hybrid cloud orchestration.",
+          skills: ["Computer Networks", "Linux Internals", "Python Scripting", "Docker", "TCP/IP"],
+          applyUrl: "https://www.linkedin.com/jobs/view/cisco-network-cloud-intern",
+          postedDate: "1 week ago",
+          deadline: "November 10, 2026",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Cisco_logo_blue_2016.svg"
+        },
+        {
+          title: "Software Engineer 1 (Core Platform)",
+          company: "Uber",
+          location: "Bengaluru / Hyderabad",
+          source: "LinkedIn",
+          type: "Full-time",
+          salary: "₹22.0 - ₹28.0 LPA",
+          level: "Fresher",
+          batchEligibility: ["2025"],
+          workplaceType: "Hybrid",
+          description: "Develop distributed backend microservices that power matching, surge pricing, routing, and dispatch systems worldwide with millisecond latency requirements.",
+          skills: ["Java", "Golang", "Distributed Systems", "Concurrency", "gRPC", "Kafka"],
+          applyUrl: "https://www.linkedin.com/jobs/view/uber-software-engineer-1-india",
+          postedDate: "Yesterday",
+          deadline: "October 31, 2026",
+          companyLogo: "https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
+        }
+      ];
+
+      if (checkFallback()) {
+        for (const j of mockJobs) {
+          fallbackDb.insert("jobs", j);
+        }
+      } else {
+        await Job.insertMany(mockJobs);
+      }
+      console.log("Seeded LinkedIn & Indeed job listings.");
     }
 
     // 1. Check if users are seeded

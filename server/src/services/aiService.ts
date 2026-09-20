@@ -248,53 +248,165 @@ Tell me about your target role, and let's get you placement-ready!`;
       }
     }
 
-    // Mock Questions
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Mock Questions calibrated to Tier / Difficulty
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    const diffLower = (difficulty || "").toLowerCase();
+
+    // 🔴 1. GOOGLE / FAANG TIER (Hard / Advanced)
+    if (diffLower.includes("google") || diffLower.includes("faang") || diffLower.includes("hard") || diffLower.includes("senior")) {
+      return {
+        questions: [
+          {
+            question: "Given a massive stream of integers coming from millions of client devices, design an algorithm to find the Median in O(1) time and O(N) space. How would you handle distributed workers?",
+            category: "Advanced Algorithms & DSA",
+            difficulty: "Google / FAANG Level",
+            companyTag: "Google",
+            sampleAnswer: "For a single machine, we use a Two-Heap approach: a Max-Heap for the smaller half and a Min-Heap for the larger half, maintaining a balance where heaps differ in size by at most 1. Inserting takes O(log N) and finding median is O(1). In a distributed environment with millions of streams, an exact median requires distributed histogram bucketing or Count-Min Sketch / Q-Digest quantile approximations across worker nodes.",
+            tips: ["Explain the Two-Heap balancing invariant", "Analyze space complexity and re-balancing time", "Discuss approximate distributed medians (t-digest / HyperLogLog)"]
+          },
+          {
+            question: "Design a Distributed Rate Limiter capable of handling 500,000 requests per second across multi-region data centers. Explain race condition handling and algorithm trade-offs.",
+            category: "System Design & Architecture",
+            difficulty: "Google / FAANG Level",
+            companyTag: "Google / Meta",
+            sampleAnswer: "We evaluate Token Bucket vs Sliding Window Counter. Sliding Window Counter offers higher accuracy without sudden token bursts. We store counter buckets in a Redis Cluster with Lua scripts to guarantee atomic read-modify-write operations, preventing race conditions. To avoid global cross-region latency, we deploy local Redis instances with periodic asynchronous synchronization to a central cluster using eventual consistency.",
+            tips: ["Compare Token Bucket vs Sliding Window Log vs Counter", "Mention Redis Lua scripts for atomic operations", "Address multi-datacenter clock drift and latency"]
+          },
+          {
+            question: "How does the Go/Java runtime detect and handle deadlocks, and how does the Linux Kernel prevent priority inversion in real-time preemptive scheduling?",
+            category: "Concurrency & OS Internals",
+            difficulty: "Google / FAANG Level",
+            companyTag: "Google / Netflix",
+            sampleAnswer: "Operating systems detect deadlocks via Resource Allocation Graphs and cycle-finding algorithms (Tarjan's or Banker's Algorithm). Priority inversion occurs when a low-priority thread holds a lock needed by a high-priority thread while a medium-priority thread starves it. Linux resolves this via Priority Inheritance (e.g., rt_mutex in real-time kernel), temporarily elevating the low-priority thread's priority to that of the highest waiting thread.",
+            tips: ["Define Priority Inversion clearly", "Explain Priority Inheritance Protocol (PIP) and Ceiling Protocol", "Discuss lock-free data structures (CAS)"]
+          },
+          {
+            question: "Tell me about a time you identified an architectural bottleneck that others missed, or when you had to advocate for a non-trivial refactoring against tight product deadlines (Googleyness & Leadership).",
+            category: "Behavioral & Googleyness",
+            difficulty: "Google / FAANG Level",
+            companyTag: "Google",
+            sampleAnswer: "In our university distributed lab project, our microservices experienced 4-second latency spikes under load. The team blamed network bandwidth. Profiling with OpenTelemetry revealed N+1 query loops in our ORM and unindexed foreign keys. I presented benchmark data comparing response times (4s vs 110ms with batching) and convinced the team to spend 2 days adding DataLoader patterns and compound indexes before launching.",
+            tips: ["Use data and benchmarks to justify engineering decisions", "Show humility and collaboration", "Tie results back to user experience and system reliability"]
+          }
+        ],
+        generalTips: [
+          "State your assumptions and verify scale constraints (QPS, read/write ratio, latency SLA) before coding.",
+          "Think out loud: interviewers assess your thought process and problem decomposition more than memorized code.",
+          "Analyze Big-O time and space complexity proactively without being asked."
+        ],
+        commonMistakes: [
+          "Jumping straight to coding without discussing edge cases (null inputs, integer overflows, cycles).",
+          "Being defensive when an interviewer gives a counterexample or suggests a hint.",
+          "Ignoring memory/space limits in high-scale scenarios."
+        ],
+        bodyLanguageTips: [
+          "Actively use a virtual whiteboard or structured bullet points to sketch your approach.",
+          "Maintain a steady, deliberate pace instead of rushing words."
+        ]
+      };
+    }
+
+    // 🟡 2. PRODUCT MEDIUM TIER (Unicorns: Swiggy, Razorpay, Flipkart, Uber, Atlassian)
+    if (diffLower.includes("medium") || diffLower.includes("product") || diffLower.includes("mid")) {
+      return {
+        questions: [
+          {
+            question: "Given a Binary Tree, find the Lowest Common Ancestor (LCA) of two given nodes without storing parent pointers. What is the optimal time and space complexity?",
+            category: "Data Structures & Algorithms",
+            difficulty: "Product Medium Level",
+            companyTag: "Swiggy / Flipkart",
+            sampleAnswer: "We use a recursive post-order traversal. If the current root is null or matches either node p or q, return root. Recurse for left and right subtrees. If both left and right return non-null, the current node is the LCA. If only one returns non-null, propagate that node upward. Time complexity is O(N) as each node is visited once, and space complexity is O(H) for recursion stack.",
+            tips: ["Highlight post-order DFS logic", "Distinguish between BST (O(H)) and normal Binary Tree (O(N))", "Handle cases where node does not exist"]
+          },
+          {
+            question: "Explain how database indexing works under the hood (B+ Tree vs Hash Index). Why are B+ Trees favored for relational databases, and when does an index cause performance degradation?",
+            category: "Databases & Backend Engineering",
+            difficulty: "Product Medium Level",
+            companyTag: "Razorpay / Uber",
+            sampleAnswer: "B+ Trees store all actual data pointers in leaf nodes linked sequentially, making range queries (BETWEEN, >, <) extremely fast in O(log N). Internal nodes only store keys and routing pointers. Hash indexes offer O(1) lookups but cannot support range scans or sorting. Indexes degrade performance during heavy WRITE/INSERT operations because the database must rebalance the tree and update index pages on every mutation.",
+            tips: ["Explain leaf node linked list pointers for range scans", "Discuss write amplification and maintenance overhead", "Mention composite indexes and leftmost prefix rule"]
+          },
+          {
+            question: "How do you prevent race conditions when updating student wallet balances or inventory stock in an e-commerce microservices architecture?",
+            category: "Concurrency & Microservices",
+            difficulty: "Product Medium Level",
+            companyTag: "Razorpay / Swiggy",
+            sampleAnswer: "At the database level, we can use Pessimistic Locking (SELECT ... FOR UPDATE) or Optimistic Locking with a version column (UPDATE items SET stock = stock - 1, version = version + 1 WHERE id = 1 AND version = current_version). In distributed services, we use Redis Distributed Locks (Redlock algorithm) or database-level idempotent operations with unique transaction IDs.",
+            tips: ["Contrast Optimistic vs Pessimistic locking trade-offs", "Explain idempotency keys for payment APIs", "Discuss distributed lock expiration safety"]
+          },
+          {
+            question: "Describe a project where you had to balance feature delivery speed against code quality or technical debt. How did you decide what trade-offs to make?",
+            category: "Behavioral & Engineering Ownership",
+            difficulty: "Product Medium Level",
+            companyTag: "Atlassian / Flipkart",
+            sampleAnswer: "During a hackathon campus project, we needed a notification system ready in 48 hours. Instead of setting up a dedicated Kafka broker and worker fleet, we implemented an in-memory queue with SQLite persistence for MVP delivery, while documenting the exact Redis/Kafka migration plan. Once the initial release stabilized, we scheduled a sprint to refactor it to Pub/Sub without affecting user functionality.",
+            tips: ["Highlight deliberate trade-offs rather than accidental tech debt", "Show business empathy and awareness of shipping deadlines", "Explain follow-up remediation steps"]
+          }
+        ],
+        generalTips: [
+          "Relate technical answers to production scenarios (e.g., latency, caching, database connection pooling).",
+          "Focus on clean code, modular functions, and meaningful variable names."
+        ],
+        commonMistakes: [
+          "Assuming database queries are free and ignoring indexing or N+1 queries.",
+          "Neglecting error handling and HTTP status codes in API discussions."
+        ],
+        bodyLanguageTips: [
+          "Speak with enthusiasm when discussing projects you built from scratch."
+        ]
+      };
+    }
+
+    // 🟢 3. COLLEGE / CAMPUS PLACEMENT TIER (Foundational - TCS Digital, Infosys, Wipro, College Drives)
     return {
       questions: [
         {
-          question: `Can you explain the difference between virtual DOM and real DOM, and how React processes updates?`,
-          category: "Technical",
-          difficulty: difficulty,
-          sampleAnswer: "The virtual DOM is an in-memory representation of the real HTML DOM. When a component's state changes, React updates the virtual DOM first. Then, it runs a diffing algorithm (reconciliation) to find the minimum changes and batches the updates to the real DOM, avoiding heavy re-renders.",
-          tips: ["Mention the reconciliation process", "Discuss batching of state updates", "Explain why manipulation of real DOM is slow"]
+          question: "Explain the Four Pillars of Object-Oriented Programming (OOP) with real-world examples in Java or C++. How does runtime polymorphism differ from compile-time polymorphism?",
+          category: "Core CS Fundamentals (OOPs)",
+          difficulty: "College Placement Level",
+          companyTag: "TCS Digital / Infosys / Wipro",
+          sampleAnswer: "The four pillars are Encapsulation (wrapping data and methods into a single class with access specifiers), Abstraction (hiding internal implementation details using interfaces/abstract classes), Inheritance (reusing parent class properties in child classes), and Polymorphism (ability to take multiple forms). Compile-time polymorphism is achieved via Method Overloading (same method name with different parameter signatures resolved at compile time), whereas Runtime Polymorphism is achieved via Method Overriding using virtual functions or @Override annotations resolved dynamically via vtables.",
+          tips: ["Give a clear Real-world example (e.g., Vehicle class with Car child)", "Explain the role of 'private' vs 'public' for Encapsulation", "State the difference between Overloading and Overriding"]
         },
         {
-          question: `Where do you see yourself in 5 years, and how does this role align with your goals?`,
-          category: "HR",
-          difficulty: difficulty,
-          sampleAnswer: "In five years, I hope to grow into a senior technical lead role, driving architecture design. This junior developer role is a perfect start as it exposes me to production environments, structured mentoring, and advanced technologies where I can consolidate my skills.",
-          tips: ["Keep it professional, not personal", "Connect the role directly to your trajectory", "Express willingness to stay and grow in the company"]
+          question: "What are ACID properties in DBMS? Explain 1NF, 2NF, and 3NF normalization with a student table example.",
+          category: "Databases (DBMS & SQL)",
+          difficulty: "College Placement Level",
+          companyTag: "Cognizant / Accenture / Deloitte",
+          sampleAnswer: "ACID stands for Atomicity (all or nothing), Consistency (preserves database constraints), Isolation (concurrent transactions don't interfere), and Durability (committed changes survive system crashes). Normalization reduces data redundancy: 1NF requires atomic values in every column (no comma-separated lists); 2NF requires 1NF and no partial dependencies (every non-prime attribute fully depends on the primary key); 3NF requires 2NF and no transitive dependencies (non-prime attributes depend only on the primary key, not on another non-prime attribute).",
+          tips: ["Break down each letter of ACID with 1 line explanation", "Show how a Student table with multiple phone numbers violates 1NF", "Explain why normalization is preferred over denormalization in OLTP"]
         },
         {
-          question: `Tell me about a time you worked in a team and faced a major disagreement. How did you resolve it?`,
-          category: "Behavioral",
-          difficulty: difficulty,
-          sampleAnswer: "During our graduation project, two team members disagreed on using SQL vs MongoDB. I set up a evaluation chart comparing read speed, schema flexibility, and query complexness. We reviewed the criteria objectively and agreed on PostgreSQL, satisfying both parties.",
-          tips: ["Use the STAR method", "Focus on communication and logic, not emotions", "End with the positive outcome"]
+          question: "What is the difference between a Process and a Thread? What are the 4 necessary conditions for a Deadlock to occur?",
+          category: "Operating Systems (OS)",
+          difficulty: "College Placement Level",
+          companyTag: "TCS / Infosys",
+          sampleAnswer: "A Process is an executing program with its own dedicated memory address space (Heap, Stack, Code, Data). A Thread is a lightweight unit of execution within a process that shares the heap, global variables, and open files, but has its own call stack and program counter. The 4 Coffman conditions for a deadlock are: 1. Mutual Exclusion (non-shareable resources), 2. Hold and Wait (process holds one resource while waiting for another), 3. No Preemption (resources cannot be forcibly confiscated), 4. Circular Wait (a closed loop chain of processes waiting on each other).",
+          tips: ["Mention that context switching between threads is faster than processes", "Name the 4 conditions: Mutual Exclusion, Hold & Wait, No Preemption, Circular Wait", "Provide the Dining Philosophers analogy if asked"]
         },
         {
-          question: `If a production service goes down on a weekend and your manager is unreachable, what actions would you take?`,
-          category: "Situational",
-          difficulty: difficulty,
-          sampleAnswer: "I would first check error logs and alert dashboards to identify the root issue. If it was a quick rollback, I would initiate it. If not, I would page our secondary standby engineer, document everything on Slack, and email a summary once resolved.",
-          tips: ["Demonstrate responsibility and initiative", "Emphasize collaboration and safety procedures", "Highlight documenting actions"]
+          question: "Walk me through your resume and final-year capstone project. What was your personal contribution, and what was the biggest technical challenge you resolved?",
+          category: "Placement HR & Capstone Presentation",
+          difficulty: "College Placement Level",
+          companyTag: "Campus HR Round",
+          sampleAnswer: "I am a final-year student passionate about full-stack engineering. For our capstone project, our team built an AI-assisted Student Career Guide. My primary role was architecting the backend Express API and database models, as well as integrating responsive UI dashboards in React. Our biggest challenge was handling asynchronous resume parsing latency; I resolved this by introducing optimistic UI updates and background task queues, reducing perceived user waiting time by 40%.",
+          tips: ["Keep your introduction under 90 seconds", "Highlight what YOU specifically coded, not just what the team did", "Mention technologies used and end with the outcome or impact"]
         }
       ],
       generalTips: [
-        "Take a breath of 3 seconds before answering complex questions.",
-        "Structure your technical answers using 'What', 'How', and 'Why'.",
-        "It is completely fine to say 'I don't know the exact answer, but here is how I would approach it.'"
+        "Be crystal clear on your basic definitions (OOPs, DBMS, OS, Data Structures).",
+        "Practice writing syntactically correct code on paper or a plain text editor without auto-complete.",
+        "Be honest about your resume: only list technologies you can confidently explain."
       ],
       commonMistakes: [
-        "Rushing into coding answers without asking clarifying constraints.",
-        "Speaking negatively about previous colleges, teammates, or projects.",
-        "Answering with single-word replies without explaining your reasoning."
+        "Memorizing definitions without being able to write a 5-line code snippet demonstrating it.",
+        "Saying 'we did this' for the entire project without clarifying your individual role.",
+        "Giving up immediately when asked an unfamiliar question instead of reasoning through the basics."
       ],
       bodyLanguageTips: [
-        "Keep eye contact with the camera, not just the screen.",
-        "Maintain a straight, confident posture to reflect calm energy.",
-        "Nod periodically to demonstrate active listening during discussions."
+        "Sit straight, smile, and speak audibly.",
+        "Acknowledge questions politely with 'Thank you, sir/ma'am, let me explain...'"
       ]
     };
   },
