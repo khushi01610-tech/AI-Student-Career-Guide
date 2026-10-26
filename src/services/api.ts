@@ -17,11 +17,16 @@ const getHeaders = (isMultipart = false) => {
 
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
-    let errorMsg = "API Request failed";
+    let errorMsg = `Request failed (${response.status})`;
     try {
       const errJson = await response.json();
-      errorMsg = errJson.message || errorMsg;
-    } catch (_) {}
+      errorMsg = errJson.message || errJson.error || errorMsg;
+    } catch (_) {
+      try {
+        const text = await response.text();
+        if (text) errorMsg = text;
+      } catch (_) {}
+    }
     throw new Error(errorMsg);
   }
   return response.json();

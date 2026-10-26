@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, User, Mail, Lock, ShieldAlert, GraduationCap, MapPin } from "lucide-react";
+import { Loader2, User, Mail, Lock, ShieldAlert, GraduationCap, MapPin, AlertCircle, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Register() {
@@ -22,6 +22,7 @@ export default function Register() {
     skills: "",
     careerGoal: ""
   });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const { toast } = useToast();
@@ -33,6 +34,7 @@ export default function Register() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
     const { name, email, password, college, course, branch, graduationYear, careerGoal } = formData;
     
     if (!name || !email || !password || !college || !course || !branch || !graduationYear || !careerGoal) {
@@ -49,11 +51,21 @@ export default function Register() {
       toast({ title: "Account Created!", description: "Welcome to AI Student Career Guide." });
       navigate("/dashboard");
     } catch (err: any) {
-      toast({
-        title: "Registration Failed",
-        description: err.message || "An error occurred during registration.",
-        variant: "destructive"
-      });
+      const msg = err.message || "An error occurred during registration.";
+      setErrorMessage(msg);
+      if (msg.toLowerCase().includes("already exists")) {
+        toast({
+          title: "Account Already Exists",
+          description: `An account for ${email} is already registered. Please sign in!`,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Registration Failed",
+          description: msg,
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -76,6 +88,27 @@ export default function Register() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleRegister} className="space-y-4">
+              {errorMessage && (
+                <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 text-xs text-destructive flex items-start gap-2.5">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <div className="flex-1 space-y-1.5">
+                    <p className="font-semibold text-foreground">{errorMessage}</p>
+                    {errorMessage.toLowerCase().includes("already exists") && (
+                      <div className="pt-1">
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => navigate(`/login?email=${encodeURIComponent(formData.email)}`)}
+                          className="h-8 text-xs gap-1.5 font-semibold w-full sm:w-auto"
+                        >
+                          Sign In With This Email <ArrowRight className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
