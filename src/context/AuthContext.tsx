@@ -60,11 +60,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     try {
-      const data = await api.auth.me();
+      const fetchWithTimeout = Promise.race([
+        api.auth.me(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Auth timeout")), 3500))
+      ]);
+      const data: any = await fetchWithTimeout;
       setUser(data.user);
       setProfile(data.profile);
     } catch (error) {
-      console.error("Token authentication failed, logging out:", error);
+      console.warn("Token check failed or timed out:", error);
       logout();
     } finally {
       setLoading(false);

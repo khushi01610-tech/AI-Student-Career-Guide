@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Pages
 import LandingPage from "@/pages/LandingPage";
@@ -32,62 +33,66 @@ import CareerVault from "@/pages/CareerVault";
 import JobSearch from "@/pages/JobSearch";
 import NotFound from "@/pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-// A helper layout switcher to render layout only when authenticated
 const MainRoutes = () => {
   const { isAuthenticated } = useAuth();
   
   return (
-    <AppLayout>
-      <Routes>
-        {/* Public Landing route at / */}
-        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
-        
-        {/* Auth routes */}
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
-        <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        
-        {/* Protected Dashboard pages */}
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/companies" element={<ProtectedRoute><CompanyArchives /></ProtectedRoute>} />
-        <Route path="/applications" element={<ProtectedRoute><ApplicationTracker /></ProtectedRoute>} />
-        <Route path="/jobs" element={<ProtectedRoute><JobSearch /></ProtectedRoute>} />
-        <Route path="/mentors" element={<ProtectedRoute><Mentorship /></ProtectedRoute>} />
-        <Route path="/vault" element={<ProtectedRoute><CareerVault /></ProtectedRoute>} />
-        <Route path="/chat" element={<ProtectedRoute><AICareerAssistant /></ProtectedRoute>} />
-        <Route path="/interview" element={<ProtectedRoute><InterviewPrep /></ProtectedRoute>} />
-        <Route path="/mock-interview" element={<ProtectedRoute><MockInterviewSystem /></ProtectedRoute>} />
-        <Route path="/communication" element={<ProtectedRoute><CommunicationSkills /></ProtectedRoute>} />
-        <Route path="/resume" element={<ProtectedRoute><ResumeAnalyzer /></ProtectedRoute>} />
-        <Route path="/roadmap" element={<ProtectedRoute><CareerRoadmap /></ProtectedRoute>} />
-        <Route path="/career-hub" element={<ProtectedRoute><CareerHub /></ProtectedRoute>} />
-        <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
-        <Route path="/videos" element={<ProtectedRoute><Videos /></ProtectedRoute>} />
-        <Route path="/collaboration" element={<ProtectedRoute><Collaboration /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        
-        {/* Fallback */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AppLayout>
+    <Routes>
+      {/* Public Pages */}
+      <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
+      <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      
+      {/* Protected Dashboard and Internal Workspace pages */}
+      <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
+      <Route path="/companies" element={<ProtectedRoute><AppLayout><CompanyArchives /></AppLayout></ProtectedRoute>} />
+      <Route path="/applications" element={<ProtectedRoute><AppLayout><ApplicationTracker /></AppLayout></ProtectedRoute>} />
+      <Route path="/jobs" element={<ProtectedRoute><AppLayout><JobSearch /></AppLayout></ProtectedRoute>} />
+      <Route path="/mentors" element={<ProtectedRoute><AppLayout><Mentorship /></AppLayout></ProtectedRoute>} />
+      <Route path="/vault" element={<ProtectedRoute><AppLayout><CareerVault /></AppLayout></ProtectedRoute>} />
+      <Route path="/chat" element={<ProtectedRoute><AppLayout><AICareerAssistant /></AppLayout></ProtectedRoute>} />
+      <Route path="/interview" element={<ProtectedRoute><AppLayout><InterviewPrep /></AppLayout></ProtectedRoute>} />
+      <Route path="/mock-interview" element={<ProtectedRoute><AppLayout><MockInterviewSystem /></AppLayout></ProtectedRoute>} />
+      <Route path="/communication" element={<ProtectedRoute><AppLayout><CommunicationSkills /></AppLayout></ProtectedRoute>} />
+      <Route path="/resume" element={<ProtectedRoute><AppLayout><ResumeAnalyzer /></AppLayout></ProtectedRoute>} />
+      <Route path="/roadmap" element={<ProtectedRoute><AppLayout><CareerRoadmap /></AppLayout></ProtectedRoute>} />
+      <Route path="/career-hub" element={<ProtectedRoute><AppLayout><CareerHub /></AppLayout></ProtectedRoute>} />
+      <Route path="/community" element={<ProtectedRoute><AppLayout><Community /></AppLayout></ProtectedRoute>} />
+      <Route path="/videos" element={<ProtectedRoute><AppLayout><Videos /></AppLayout></ProtectedRoute>} />
+      <Route path="/collaboration" element={<ProtectedRoute><AppLayout><Collaboration /></AppLayout></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><AppLayout><Profile /></AppLayout></ProtectedRoute>} />
+      
+      {/* Fallback */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <MainRoutes />
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <MainRoutes />
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
