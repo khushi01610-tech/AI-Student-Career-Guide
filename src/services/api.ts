@@ -91,33 +91,13 @@ export const api = {
   // Chat Career Assistant ("CareerGuide AI")
   chat: {
     sendMessage: (message: string, history: any[], profile: any) => 
-      fetch(`${API_BASE_URL}/profile/dashboard`, { method: "GET", headers: getHeaders() }) // simple handshake wrapper
-        .then(async () => {
-          // Point to custom helper mock AI endpoint
-          // Since it's dynamic chatbot, we hit backend chatbot API (which is auth/dashboard or we mock in frontend helper directly)
-          // To keep backend simple, we mock the chat endpoint call or request a custom route.
-          // Let's call the backend /api/interview/generate or another API to fetch AI client directly.
-          // Wait, let's request a chat response. We can do it by creating a /api/chat route or adding it to interview.
-          // Let's check: we can hit a backend chatbot endpoint. Wait! Did we add /api/chat? No, we didn't add chatRoutes.
-          // But wait, we can easily add a chatbot controller or we can mock chatbot directly in the frontend api client,
-          // OR even better: let's quickly check what backend endpoints we can call. We can make a request to `/api/interview/generate`
-          // or we can write a tiny chat endpoint in server.ts or we can use our modular aiService in frontend since we can mock it here!
-          // Let's write a mock/real fetch in frontend: if it can, fetch from backend, otherwise fallback to local aiService simulation.
-          // Actually, we can fetch from a new endpoint '/api/communication/evaluate-intro' or we can mock it in api.ts to keep it simple.
-          // Let's implement a clean mock chatbot call with 600ms latency that simulates "CareerGuide AI" directly.
-          await new Promise(resolve => setTimeout(resolve, 800));
-          const msg = message.toLowerCase();
-          if (msg.includes("resume")) {
-            return `### Resume Improvement Guide 📄\n1. **Use STAR bullet points**: Describe what you did, the tools used, and the measurable outcome (e.g. *Optimized SQL lookup speed by 15%*).\n2. **Group Skills**: Segment into Front-End, Back-End, Tools to help scanner keywords extraction.\n3. **Formatting**: Avoid multi-columns or graphics. Keep layouts chronological.`;
-          }
-          if (msg.includes("prepare") || msg.includes("interview")) {
-            return `### Interview Preparation Roadmap 🎯\n* **Weeks 1-2**: Practice core data structures (Arrays, Trees, Hashes) on LeetCode/HackerRank.\n* **Week 3**: Prepare STAR stories for behavioral topics (*Tell me about yourself*, *How you resolved a team dispute*).\n* **Week 4**: Conduct peer mock panels under the Collaboration dashboard.`;
-          }
-          if (msg.includes("frontend") || msg.includes("react")) {
-            return `### Frontend Developer Learning Roadmap 🛤️\nHTML/CSS basics ➡️ JS (Async, ES6) ➡️ Git & GitHub ➡️ React Component Hooks ➡️ Tailwind Utility Styling ➡️ REST API Integration ➡️ Unit Testing (Jest) ➡️ Vercel deployment.`;
-          }
-          return `### Hello! I am CareerGuide AI 🧠\n\nI can help you with:\n* Custom roadmaps for **Frontend, Backend or Data Analytics**\n* ATS resume keyword matching checklists\n* Technical/HR interview preparation schedules\n* Speaking confidence tips\n\nAsk me any career question!`;
-        })
+      fetch(`${API_BASE_URL}/chat`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ message, history, profile })
+      })
+        .then(handleResponse)
+        .then(data => data.reply)
   },
 
   // Interview Prep & Mock Interviews

@@ -193,8 +193,7 @@ export const commentPost = async (req: AuthenticatedRequest, res: Response) => {
     if (!post) return res.status(404).json({ message: "Post not found" });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const newComment = {
-      _id: uuidv4(),
+    const newComment: any = {
       user: userId!,
       name: user.name,
       avatarUrl: profile?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}`,
@@ -204,6 +203,7 @@ export const commentPost = async (req: AuthenticatedRequest, res: Response) => {
     };
 
     if (checkFallback()) {
+      newComment._id = uuidv4();
       const comments = post.comments || [];
       comments.push(newComment);
       post = fallbackDb.findByIdAndUpdate("posts", id, { comments });

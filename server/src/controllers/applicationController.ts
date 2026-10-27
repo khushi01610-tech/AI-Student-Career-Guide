@@ -23,7 +23,18 @@ export const getApplications = async (req: AuthenticatedRequest, res: Response) 
 
 export const createApplication = async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.userId;
-  const { companyName, role, jobType, location, ctc, applicationDate, deadline, stage, referralName, jobUrl, notes } = req.body;
+  const companyName = req.body.companyName || req.body.company;
+  const role = req.body.role;
+  const jobType = req.body.jobType || "Full-Time";
+  const location = req.body.location || "On-site / Hybrid";
+  const ctc = req.body.ctc || req.body.package || "";
+  const rawDate = req.body.applicationDate || req.body.appliedDate;
+  const applicationDate = rawDate ? new Date(rawDate) : new Date();
+  const deadline = req.body.deadline ? new Date(req.body.deadline) : undefined;
+  const stage = req.body.stage || "Applied";
+  const referralName = req.body.referralName || "";
+  const jobUrl = req.body.jobUrl || "";
+  const notes = req.body.notes || "";
 
   if (!companyName || !role) {
     return res.status(400).json({ message: "Company name and role are required." });
@@ -35,15 +46,15 @@ export const createApplication = async (req: AuthenticatedRequest, res: Response
         user: userId,
         companyName,
         role,
-        jobType: jobType || "Full-Time",
-        location: location || "On-site / Hybrid",
-        ctc: ctc || "",
-        applicationDate: applicationDate ? new Date(applicationDate) : new Date(),
-        deadline: deadline ? new Date(deadline) : undefined,
-        stage: stage || "Applied",
-        referralName: referralName || "",
-        jobUrl: jobUrl || "",
-        notes: notes || "",
+        jobType,
+        location,
+        ctc,
+        applicationDate,
+        deadline,
+        stage,
+        referralName,
+        jobUrl,
+        notes,
         createdAt: new Date(),
         updatedAt: new Date()
       });
@@ -54,12 +65,12 @@ export const createApplication = async (req: AuthenticatedRequest, res: Response
       user: userId,
       companyName,
       role,
-      jobType: jobType || "Full-Time",
-      location: location || "On-site / Hybrid",
-      ctc: ctc || "",
-      applicationDate: applicationDate || Date.now(),
+      jobType,
+      location,
+      ctc,
+      applicationDate,
       deadline,
-      stage: stage || "Applied",
+      stage,
       referralName,
       jobUrl,
       notes
