@@ -16,6 +16,7 @@ dist
 dist-ssr
 server/dist
 *.local
+*.tsbuildinfo
 
 # Environment variables
 .env

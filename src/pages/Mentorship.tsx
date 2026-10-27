@@ -18,7 +18,7 @@ import {
   ExternalLink,
   MessageSquare
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const DOMAINS = ["All", "Software Engineering", "Product Management", "Data Science", "Consulting", "System Design"];
 

@@ -389,7 +389,7 @@ export default function Dashboard() {
             {upcomingSessions.length === 0 ? (
               <div className="py-6 text-center text-xs text-muted-foreground space-y-2">
                 <p>No active mock meets scheduled.</p>
-                <Button size="xs" variant="outline" onClick={() => navigate("/collaboration")}>Schedule a Meet</Button>
+                <Button size="sm" variant="outline" onClick={() => navigate("/collaboration")}>Schedule a Meet</Button>
               </div>
             ) : (
               upcomingSessions.slice(0, 3).map((session: any) => (
@@ -400,7 +400,7 @@ export default function Dashboard() {
                       <span>Host: {session.creatorName} ({session.creatorCollege})</span>
                     </p>
                   </div>
-                  <Button size="xs" onClick={() => navigate("/collaboration")} className="h-7 text-[10px]">Join</Button>
+                  <Button size="sm" onClick={() => navigate("/collaboration")} className="h-7 text-[10px]">Join</Button>
                 </div>
               ))
             )}

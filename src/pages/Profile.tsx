@@ -225,7 +225,7 @@ export default function Profile() {
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="edit-goal">Target Career Goal</Label>
-                      <Input id="edit-goal" value={careerGoal} onChange={e => setRole(e.target.value)} placeholder="e.g. Frontend Developer" />
+                      <Input id="edit-goal" value={careerGoal} onChange={e => setCareerGoal(e.target.value)} placeholder="e.g. Frontend Developer" />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="edit-skills">Skills (Comma-separated)</Label>
@@ -287,7 +287,7 @@ export default function Profile() {
                 
                 <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button size="xs" variant="outline" className="gap-1 text-[10px] h-7 px-2">
+                    <Button size="sm" variant="outline" className="gap-1 text-[10px] h-7 px-2">
                       <PlusCircle className="h-3.5 w-3.5" /> Add Project
                     </Button>
                   </DialogTrigger>

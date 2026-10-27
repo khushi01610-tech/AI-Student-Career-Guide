@@ -56,7 +56,7 @@ const MainRoutes = () => {
       
       {/* Protected Dashboard and Internal Workspace pages */}
       <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
-      <Route path="/companies" element={<ProtectedRoute><AppLayout><CompanyArchives /></AppLayout></ProtectedRoute>} />
+      <Route path="/companies" element={<AppLayout><CompanyArchives /></AppLayout>} />
       <Route path="/applications" element={<ProtectedRoute><AppLayout><ApplicationTracker /></AppLayout></ProtectedRoute>} />
       <Route path="/jobs" element={<ProtectedRoute><AppLayout><JobSearch /></AppLayout></ProtectedRoute>} />
       <Route path="/mentors" element={<ProtectedRoute><AppLayout><Mentorship /></AppLayout></ProtectedRoute>} />

@@ -68,7 +68,7 @@ export default function LandingPage() {
           <Button size="lg" onClick={() => navigate("/register")} className="h-11 px-6 text-sm font-semibold shadow-sm w-full sm:w-auto">
             Create Student Profile <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-          <Button size="lg" variant="outline" onClick={() => navigate("/login")} className="h-11 px-6 text-sm font-semibold w-full sm:w-auto">
+          <Button size="lg" variant="outline" onClick={() => navigate("/companies")} className="h-11 px-6 text-sm font-semibold w-full sm:w-auto hover:border-primary">
             Browse Placement Archives
           </Button>
         </div>
@@ -106,11 +106,14 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            <Card className="bg-card border-border p-5 space-y-3 shadow-sm hover:shadow-md transition-shadow">
+            <Card 
+              onClick={() => navigate("/companies")}
+              className="bg-card border-border p-5 space-y-3 shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer"
+            >
               <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <Building2 className="h-5 w-5" />
               </div>
-              <h3 className="font-bold text-base text-foreground">Company Archives</h3>
+              <h3 className="font-bold text-base text-foreground group-hover:text-primary">Company Archives</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Hiring patterns, CGPA cutoffs, and exact questions asked at Google, Amazon, Deloitte, Microsoft, and TCS.
               </p>

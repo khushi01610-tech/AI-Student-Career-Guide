@@ -1,8 +1,9 @@
 import { ReactNode, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Check, Loader2, RefreshCw } from "lucide-react";
+import { Bell, Check, Loader2, RefreshCw, GraduationCap } from "lucide-react";
 import { api } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -16,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -140,6 +142,32 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   className="h-2 w-2 rounded-full bg-accent" 
                 />
                 <span className="text-xs text-muted-foreground hidden sm:inline-block">AI Career Coach Active</span>
+              </div>
+            </header>
+          )}
+
+          {!isAuthenticated && (
+            <header className="h-16 flex items-center justify-between border-b border-border/80 px-4 md:px-8 bg-card/90 backdrop-blur-md sticky top-0 z-20 relative">
+              <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
+                <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
+                  <GraduationCap className="h-5 w-5" />
+                </div>
+                <div>
+                  <span className="font-bold text-sm text-foreground tracking-tight block">Student Career Guide</span>
+                  <span className="text-[10px] text-muted-foreground hidden sm:block">Campus Placement Portal</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-xs font-semibold">
+                  Home
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate("/login")} className="text-xs font-semibold">
+                  Sign In
+                </Button>
+                <Button size="sm" onClick={() => navigate("/register")} className="text-xs font-semibold">
+                  Get Started
+                </Button>
               </div>
             </header>
           )}
