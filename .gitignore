@@ -22,6 +22,7 @@ server/dist
 .env
 .env.*
 *.env
+!*.env.example
 
 # Local data & uploads
 server/data/fallback_db.json

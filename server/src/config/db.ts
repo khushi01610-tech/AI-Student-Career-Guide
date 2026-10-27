@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import path from "path";
 
 dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 let isFallbackMode = false;
 
