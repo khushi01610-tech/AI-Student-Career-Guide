@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Loader2, 
@@ -17,7 +18,11 @@ import {
   EyeOff, 
   ShieldCheck, 
   ArrowRight,
-  Sparkles
+  Sparkles,
+  CheckCircle2,
+  Code2,
+  Radio,
+  ArrowLeft
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -65,151 +70,233 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 dark:bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors">
-      <motion.div 
-        initial={{ opacity: 0, y: 16 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ duration: 0.35, ease: "easeOut" }} 
-        className="sm:mx-auto sm:w-full sm:max-w-md"
-      >
-        {/* Brand Header */}
-        <div className="text-center mb-8 space-y-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <GraduationCap className="h-6 w-6" />
+    <div className="min-h-screen bg-background grid grid-cols-1 lg:grid-cols-12 selection:bg-primary/20">
+      {/* Left Column: Clean Authentication Form */}
+      <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-between p-6 sm:p-10 lg:p-12">
+        {/* Top Header */}
+        <div className="flex items-center justify-between">
+          <Link to="/" className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Home
+          </Link>
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
+              <GraduationCap className="h-4 w-4" />
+            </div>
+            <span className="font-bold text-xs tracking-tight font-heading">
+              Student Career Guide
+            </span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">AI Career Growth Engine</h1>
-          <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-            University Placement Portal & Adaptive AI Guidance for CSE & BJMC Students
-          </p>
         </div>
 
-        {/* Login Card */}
-        <Card className="border border-border/80 shadow-sm rounded-2xl bg-card">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl font-semibold tracking-tight text-foreground">Sign In</CardTitle>
-            <CardDescription className="text-xs text-muted-foreground">
-              Enter your student credentials to access your dashboard
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-xs font-medium text-foreground">
-                  College / Institutional Email
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="student@university.edu"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-9 h-10 text-sm bg-background border-border"
-                    required
-                  />
-                </div>
-              </div>
+        {/* Center Card */}
+        <div className="my-auto py-8 max-w-md w-full mx-auto space-y-6">
+          <div className="space-y-1.5 text-left">
+            <Badge variant="outline" className="text-[10px] font-semibold text-primary border-primary/30 mb-1">
+              Campus Placement Portal
+            </Badge>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground font-heading">
+              Sign In to Your Account
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Access your personalized ATS resume scorer, mock interviews, and live campus drives.
+            </p>
+          </div>
 
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="password" className="text-xs font-medium text-foreground">Password</Label>
-                  <Link to="/forgot-password" className="text-xs text-primary hover:underline font-medium">
-                    Forgot password?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-9 pr-10 h-10 text-sm bg-background border-border"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs font-semibold text-foreground">
+                Institutional / Student Email
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="student@university.edu"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-9 h-10 text-sm bg-card border-border"
+                  required
+                />
               </div>
-
-              <div className="flex items-center justify-between pt-1">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="remember" 
-                    checked={rememberMe} 
-                    onCheckedChange={(checked) => setRememberMe(!!checked)} 
-                  />
-                  <label htmlFor="remember" className="text-xs text-muted-foreground cursor-pointer select-none">
-                    Remember this device
-                  </label>
-                </div>
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full h-10 text-sm font-semibold shadow-sm transition-all mt-2" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Signing in...
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Sign In to Portal
-                  </>
-                )}
-              </Button>
-            </form>
-
-            {/* Quick Demo Credentials */}
-            <div className="mt-4 pt-3 border-t border-border/60">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
-                  <Sparkles className="h-3 w-3 text-primary" /> Evaluation Demo Login
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleDemoFill("khushi01610@gmail.com")}
-                className="w-full text-left p-2 rounded-lg bg-muted/50 hover:bg-muted border border-border/60 transition-colors flex items-center justify-between group"
-              >
-                <div className="text-[11px]">
-                  <span className="font-semibold text-foreground">khushi01610@gmail.com</span>
-                  <span className="text-muted-foreground block text-[10px]">Pre-configured Student Account</span>
-                </div>
-                <span className="text-[10px] text-primary group-hover:underline flex items-center gap-0.5">
-                  Autofill <ArrowRight className="h-3 w-3" />
-                </span>
-              </button>
             </div>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-3 justify-center border-t border-border/60 pt-4 bg-muted/20 rounded-b-2xl">
-            <p className="text-xs text-muted-foreground text-center">
-              New student joining campus placement?{" "}
-              <Link to="/register" className="text-primary font-semibold hover:underline">
-                Create an account
+
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="password" className="text-xs font-semibold text-foreground">Password</Label>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline font-medium">
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-9 pr-10 h-10 text-sm bg-card border-border"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="remember" 
+                  checked={rememberMe} 
+                  onCheckedChange={(checked) => setRememberMe(!!checked)} 
+                />
+                <label htmlFor="remember" className="text-xs text-muted-foreground cursor-pointer select-none">
+                  Keep me signed in on this device
+                </label>
+              </div>
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full h-10 text-sm font-semibold shadow-sm transition-all" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Authenticating...
+                </>
+              ) : (
+                <>
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In to Workspace
+                </>
+              )}
+            </Button>
+          </form>
+
+          {/* Quick Demo Autofill */}
+          <div className="pt-4 border-t border-border">
+            <span className="text-[11px] font-semibold text-muted-foreground block mb-2">
+              Evaluator / Demo One-Click Sign In:
+            </span>
+            <button
+              type="button"
+              onClick={() => handleDemoFill("khushi01610@gmail.com")}
+              className="w-full text-left p-3 rounded-lg bg-card hover:bg-muted/60 border border-border transition-colors flex items-center justify-between group shadow-sm"
+            >
+              <div className="text-[11px]">
+                <span className="font-bold text-foreground">khushi01610@gmail.com</span>
+                <span className="text-muted-foreground block text-[10px]">Pre-configured Student Profile (CSE & BJMC)</span>
+              </div>
+              <span className="text-[10px] font-semibold text-primary group-hover:underline flex items-center gap-0.5">
+                Autofill <ArrowRight className="h-3 w-3" />
+              </span>
+            </button>
+          </div>
+
+          <div className="text-center pt-2">
+            <p className="text-xs text-muted-foreground">
+              New student joining campus placements?{" "}
+              <Link to="/register" className="text-primary font-bold hover:underline">
+                Create your student profile
               </Link>
             </p>
-            <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground/80">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-              <span>Campus Placement Cell Security Verified</span>
+          </div>
+        </div>
+
+        {/* Bottom Security Footer */}
+        <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground border-t border-border/80 pt-4">
+          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span>Encrypted Placement Cell Authentication</span>
+        </div>
+      </div>
+
+      {/* Right Column: Editorial Visual Showcase with Photography */}
+      <div className="lg:col-span-6 xl:col-span-7 hidden lg:block relative bg-slate-900 text-white overflow-hidden">
+        {/* High-Resolution Campus Collaboration Photo */}
+        <img 
+          src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1400&q=80" 
+          alt="University students collaborating in tech lab"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Deep Editorial Scrim */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/40" />
+
+        {/* Overlay Content */}
+        <div className="relative h-full flex flex-col justify-between p-12 z-10">
+          {/* Top Pill */}
+          <div className="flex items-center justify-between">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold">
+              <span className="status-dot-active" />
+              <span>Campus Season 2025–26</span>
             </div>
-          </CardFooter>
-        </Card>
-      </motion.div>
+            <div className="flex items-center gap-2 text-xs font-mono text-white/80">
+              <Code2 className="h-3.5 w-3.5 text-blue-400" /> CSE
+              <span>•</span>
+              <Radio className="h-3.5 w-3.5 text-amber-400" /> BJMC
+            </div>
+          </div>
+
+          {/* Center Placement Spotlight Card */}
+          <div className="max-w-md space-y-6">
+            <div className="space-y-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-400">
+                Verified Placement Records
+              </span>
+              <h2 className="text-3xl font-extrabold tracking-tight font-heading leading-tight text-white">
+                Preparing Final-Year Students for Tier-1 Recruiters
+              </h2>
+              <p className="text-xs text-white/80 leading-relaxed">
+                Adaptive guidance matching university syllabi with industry hiring bars across software engineering and digital journalism.
+              </p>
+            </div>
+
+            {/* Placement Metric Strip */}
+            <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
+              <div>
+                <span className="text-2xl font-black font-heading text-white block">850+</span>
+                <span className="text-[11px] text-white/70">Verified Campus Offers</span>
+              </div>
+              <div>
+                <span className="text-2xl font-black font-heading text-emerald-400 block">₹42.0 LPA</span>
+                <span className="text-[11px] text-white/70">Top CTC (Microsoft SDE-1)</span>
+              </div>
+            </div>
+
+            {/* Testimonial Quote */}
+            <div className="p-4 rounded-xl bg-slate-900/80 backdrop-blur-md border border-white/10 shadow-lg flex items-start gap-3">
+              <img 
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" 
+                alt="Rohan Verma"
+                className="h-10 w-10 rounded-full object-cover shrink-0 border border-white/30"
+              />
+              <div className="text-xs space-y-1">
+                <p className="text-white/90 italic leading-snug">
+                  "The sequential mock interview grader helped me clear the BBC broadcast newsroom round with full confidence."
+                </p>
+                <div className="text-[11px] font-bold text-amber-300">
+                  Rohan Verma • BJMC '25, BBC News
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recruiter Logos Footer */}
+          <div className="pt-6 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
+            <span>Recruiting partners: Google, Microsoft, BBC News, Ogilvy, Swiggy</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

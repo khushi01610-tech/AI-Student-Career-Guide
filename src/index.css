@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,47 +6,54 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
+    /* Human-Crafted Modern SaaS Canvas (Warm Pearl Zinc) */
+    --background: 214 28% 98%;
     --foreground: 222 47% 11%;
 
+    /* Crisp White Elevated Cards */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 221 83% 53%;
+    /* Executive Sapphire / Royal Blue Primary */
+    --primary: 224 76% 48%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96%;
+    /* Soft Structural Neutral Surfaces */
+    --secondary: 215 25% 94%;
     --secondary-foreground: 222 47% 11%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 215 25% 95%;
+    --muted-foreground: 215 16% 45%;
 
-    --accent: 160 84% 39%;
+    /* Verified Green / Placement Emerald Accent */
+    --accent: 158 75% 38%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    /* Crisp Structural 1px Tactile Borders */
+    --border: 215 22% 89%;
+    --input: 215 22% 89%;
+    --ring: 224 76% 48%;
 
     --radius: 0.625rem;
 
-    --sidebar-background: 222 47% 11%;
+    /* Left Sidebar: Executive Deep Ink Navy */
+    --sidebar-background: 222 47% 10%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary: 224 76% 54%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent: 217 33% 16%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 20%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-border: 217 33% 18%;
+    --sidebar-ring: 224 76% 54%;
 
-    --chart-1: 221 83% 53%;
-    --chart-2: 160 84% 39%;
+    --chart-1: 224 76% 48%;
+    --chart-2: 158 75% 38%;
     --chart-3: 38 92% 50%;
     --chart-4: 262 83% 58%;
     --chart-5: 199 89% 48%;
@@ -71,7 +78,7 @@
     --muted: 217 19% 14%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 160 84% 39%;
+    --accent: 158 75% 42%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62% 45%;
@@ -91,7 +98,7 @@
     --sidebar-ring: 217 91% 60%;
 
     --chart-1: 217 91% 60%;
-    --chart-2: 160 84% 45%;
+    --chart-2: 158 75% 45%;
     --chart-3: 38 92% 55%;
     --chart-4: 262 83% 65%;
     --chart-5: 199 89% 55%;
@@ -141,20 +148,24 @@
 }
 
 @layer utilities {
-  /* Crisp Human-Crafted Cards */
+  /* Crisp Human-Crafted Tactile Cards */
   .glass-card {
     @apply bg-card border border-border shadow-sm transition-all duration-200 rounded-xl;
   }
 
   .glass-card:hover {
-    @apply border-border/90 shadow-md;
+    @apply border-border shadow-md -translate-y-0.5;
+  }
+
+  .card-elevated {
+    box-shadow: 0 1px 3px 0 rgb(15 23 42 / 0.05), 0 1px 2px -1px rgb(15 23 42 / 0.05);
   }
 
   .card-interactive {
     @apply cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/50 active:shadow-sm;
   }
 
-  /* Human-Crafted Solid Headings - Crisp contrast */
+  /* Human-Crafted Solid Headings - Crisp Contrast */
   .gradient-text {
     @apply text-foreground font-extrabold tracking-tight;
   }
@@ -177,7 +188,15 @@
     background: transparent;
   }
 
-  /* Refined Editorial Badges */
+  /* Refined Stream & Status Badges */
+  .badge-cse {
+    @apply bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-semibold;
+  }
+
+  .badge-bjmc {
+    @apply bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200 dark:border-amber-800 font-semibold;
+  }
+
   .badge-emerald {
     @apply bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-medium;
   }
@@ -198,7 +217,7 @@
     @apply bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400 border border-violet-200 dark:border-violet-800 font-medium;
   }
 
-  /* Pulse status indicators */
+  /* Real-Time Pulse Indicator */
   .status-dot-active {
     @apply relative flex h-2 w-2;
   }
@@ -211,5 +230,10 @@
   .status-dot-active::after {
     content: '';
     @apply relative inline-flex rounded-full h-2 w-2 bg-emerald-500;
+  }
+
+  /* Editorial Image Overlays */
+  .image-gradient-scrim {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.85) 100%);
   }
 }
