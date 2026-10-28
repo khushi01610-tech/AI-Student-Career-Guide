@@ -302,13 +302,17 @@ export default function Profile() {
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-border bg-muted shrink-0 shadow-sm">
+              {profile?.avatarUrl ? (
                 <img 
-                  src={profile?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.name || "Student")}`}
+                  src={profile.avatarUrl} 
                   alt="Student Avatar"
-                  className="h-full w-full object-cover"
+                  className="h-16 w-16 rounded-2xl object-cover border-2 border-border shrink-0 shadow-sm"
                 />
-              </div>
+              ) : (
+                <div className="h-16 w-16 rounded-2xl bg-primary/10 text-primary font-black text-xl flex items-center justify-center shrink-0 border border-primary/20 shadow-xs font-heading">
+                  {user?.name ? user.name.slice(0, 2).toUpperCase() : "ST"}
+                </div>
+              )}
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-xl font-bold tracking-tight text-foreground">{user?.name}</h1>

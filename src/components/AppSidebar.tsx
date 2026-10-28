@@ -14,7 +14,9 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Code2,
+  Radio
 } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -42,7 +44,7 @@ const navigationGroups = [
     label: "Main Navigation",
     items: [
       { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-      { title: "My Profile", url: "/profile", icon: User, featured: true },
+      { title: "My Profile", url: "/profile", icon: User },
       { title: "AI Career Coach", url: "/chat", icon: Bot },
     ]
   },
@@ -58,7 +60,7 @@ const navigationGroups = [
     ]
   },
   {
-    label: "Opportunities",
+    label: "Campus Drives",
     items: [
       { title: "Live Job Search", url: "/jobs", icon: Globe },
       { title: "Application Tracker", url: "/applications", icon: Briefcase },
@@ -79,30 +81,39 @@ export function AppSidebar() {
   };
 
   const displayName = user?.name || "Student";
-  const displayCollege = user?.college || "Campus Placement Cell";
   const displayDegree = user?.degree || "CSE";
-  const displayAvatar = profile?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(displayName)}`;
+  const isBJMC = displayDegree === "BJMC";
+
+  const getInitials = (name: string) => {
+    if (!name) return "ST";
+    const clean = name.trim().replace(/[^a-zA-Z\s]/g, "");
+    const parts = clean.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return clean.slice(0, 2).toUpperCase() || "ST";
+  };
+
+  const userInitials = getInitials(displayName);
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border bg-card transition-all">
-      {/* Header */}
-      <SidebarHeader className="p-3 border-b border-border/80">
+    <Sidebar collapsible="icon" className="border-r border-border bg-sidebar transition-all duration-200">
+      {/* Brand Header */}
+      <SidebarHeader className="p-3.5 border-b border-border/80">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shrink-0 text-primary-foreground shadow-sm">
+          <Link to="/dashboard" className="flex items-center gap-2.5 min-w-0 group">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shrink-0 text-primary-foreground shadow-sm group-hover:scale-105 transition-transform">
               <GraduationCap className="h-4.5 w-4.5" />
             </div>
             {!collapsed && (
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold text-foreground truncate leading-tight font-heading">
+                <span className="text-xs font-extrabold text-sidebar-foreground truncate leading-tight font-heading">
                   Career Engine
                 </span>
-                <span className="text-[10px] text-muted-foreground truncate">
+                <span className="text-[10px] text-muted-foreground truncate font-medium">
                   Placement Portal
                 </span>
               </div>
             )}
-          </div>
+          </Link>
           <Button
             variant="ghost"
             size="icon"
@@ -115,17 +126,17 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      {/* Menu Groups */}
-      <SidebarContent className="space-y-1 py-2 px-1">
+      {/* Navigation Groups */}
+      <SidebarContent className="py-2 px-2 space-y-1.5">
         {navigationGroups.map((group) => (
           <SidebarGroup key={group.label} className="py-1">
             {!collapsed && (
-              <SidebarGroupLabel className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider px-2 h-6 font-heading">
+              <SidebarGroupLabel className="text-[10px] font-bold text-muted-foreground/90 uppercase tracking-wider px-2 h-6 font-heading">
                 {group.label}
               </SidebarGroupLabel>
             )}
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="space-y-0.5">
                 {group.items.map((item: any) => {
                   const isActive = location.pathname === item.url;
                   const isProfile = item.url === "/profile";
@@ -133,20 +144,22 @@ export function AppSidebar() {
                   const buttonContent = (
                     <NavLink
                       to={item.url}
-                      className={`flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-all group ${
                         isActive
-                          ? "bg-primary text-primary-foreground font-semibold shadow-sm"
-                          : isProfile
-                          ? "text-foreground font-semibold hover:bg-muted/70 border border-border/40"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                          ? "bg-primary text-primary-foreground shadow-xs font-bold"
+                          : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <item.icon className={`h-4 w-4 shrink-0 ${isProfile && !isActive ? "text-primary" : ""}`} />
+                        <item.icon className={`h-4 w-4 shrink-0 transition-colors ${
+                          isActive 
+                            ? "text-primary-foreground" 
+                            : "text-muted-foreground group-hover:text-foreground"
+                        }`} />
                         {!collapsed && <span className="truncate">{item.title}</span>}
                       </div>
                       {!collapsed && isProfile && !isActive && (
-                        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-primary/30 text-primary font-mono">
+                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-primary/30 text-primary font-mono font-bold bg-primary/5">
                           {displayDegree}
                         </Badge>
                       )}
@@ -180,24 +193,29 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      {/* Footer Profile - Clickable card navigating straight to /profile */}
-      <SidebarFooter className="p-3 border-t border-border/80 space-y-2 bg-muted/20">
+      {/* Footer Profile */}
+      <SidebarFooter className="p-3 border-t border-border/80 space-y-2 bg-sidebar-accent/40">
         <Link 
           to="/profile" 
-          title="Click to view and edit your profile"
-          className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-muted transition-colors cursor-pointer group"
+          title="Click to view and edit your student profile"
+          className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-sidebar-accent transition-colors cursor-pointer group"
         >
-          <div className="h-8 w-8 rounded-full overflow-hidden border border-border shrink-0 bg-muted ring-1 ring-primary/20 group-hover:ring-primary transition-all">
+          {profile?.avatarUrl ? (
             <img 
-              src={displayAvatar} 
+              src={profile.avatarUrl} 
               alt={displayName}
-              className="h-full w-full object-cover"
+              className="h-8 w-8 rounded-full object-cover border border-border shrink-0"
             />
-          </div>
+          ) : (
+            <div className="h-8 w-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/20 shrink-0 group-hover:scale-105 transition-transform">
+              {userInitials}
+            </div>
+          )}
+
           {!collapsed && (
             <div className="flex-1 min-w-0 text-left">
               <div className="flex items-center gap-1.5">
-                <p className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                <p className="text-xs font-bold text-sidebar-foreground truncate group-hover:text-primary transition-colors">
                   {displayName}
                 </p>
                 <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 font-mono font-bold border-primary/30 text-primary">

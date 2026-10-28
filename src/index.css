@@ -42,15 +42,15 @@
 
     --radius: 0.625rem;
 
-    /* Left Sidebar: Executive Deep Ink Navy */
-    --sidebar-background: 222 47% 10%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 224 76% 54%;
+    /* Left Sidebar: Cohesive Clean Canvas (Modeled after Linear, Stripe, Notion, Handshake) */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 224 76% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 16%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 18%;
-    --sidebar-ring: 224 76% 54%;
+    --sidebar-accent: 215 25% 94%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 215 22% 89%;
+    --sidebar-ring: 224 76% 48%;
 
     --chart-1: 224 76% 48%;
     --chart-2: 158 75% 38%;
