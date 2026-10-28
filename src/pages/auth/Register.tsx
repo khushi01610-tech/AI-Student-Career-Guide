@@ -7,26 +7,82 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, User, Mail, Lock, ShieldAlert, GraduationCap, MapPin, AlertCircle, ArrowRight } from "lucide-react";
+import { 
+  Loader2, 
+  User, 
+  Mail, 
+  Lock, 
+  GraduationCap, 
+  AlertCircle, 
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Code2,
+  Newspaper,
+  CheckCircle2
+} from "lucide-react";
 import { motion } from "framer-motion";
 
+const CSE_GOALS = [
+  "Full Stack Developer",
+  "Frontend Developer",
+  "Backend Developer",
+  "Data Analyst",
+  "Machine Learning Engineer",
+  "DevOps / Cloud Associate",
+  "QA Automation Engineer"
+];
+
+const BJMC_GOALS = [
+  "Content Writer / Strategist",
+  "Digital Journalist / Reporter",
+  "PR & Brand Specialist",
+  "Social Media Manager",
+  "Video Producer / Editor",
+  "Broadcast Anchor / Assistant Producer"
+];
+
 export default function Register() {
+  const [degree, setDegree] = useState<"CSE" | "BJMC">("CSE");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     college: "",
-    course: "",
-    branch: "",
-    graduationYear: "",
-    skills: "",
-    careerGoal: ""
+    course: "B.Tech CSE",
+    branch: "Computer Science & Engineering",
+    academicYear: "4",
+    graduationYear: "2025",
+    skills: "React, Node.js, JavaScript, Python, SQL",
+    careerGoal: "Full Stack Developer"
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const handleDegreeChange = (newDegree: "CSE" | "BJMC") => {
+    setDegree(newDegree);
+    if (newDegree === "CSE") {
+      setFormData(prev => ({
+        ...prev,
+        course: "B.Tech",
+        branch: "Computer Science & Engineering",
+        skills: "React, Node.js, JavaScript, Python, SQL, Git",
+        careerGoal: "Full Stack Developer"
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        course: "BJMC",
+        branch: "Journalism & Mass Communication",
+        skills: "News Writing, Copy Editing, Social Media, Adobe Premiere, Content Strategy",
+        careerGoal: "Digital Journalist / Reporter"
+      }));
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -38,7 +94,20 @@ export default function Register() {
     const { name, email, password, college, course, branch, graduationYear, careerGoal } = formData;
     
     if (!name || !email || !password || !college || !course || !branch || !graduationYear || !careerGoal) {
-      toast({ title: "Validation Error", description: "Please fill out all mandatory fields.", variant: "destructive" });
+      toast({ 
+        title: "Validation Error", 
+        description: "Please complete all required fields.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Weak Password",
+        description: "Password must be at least 6 characters.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -46,6 +115,8 @@ export default function Register() {
     try {
       await register({
         ...formData,
+        degree,
+        academicYear: Number(formData.academicYear) || 4,
         graduationYear: Number(graduationYear)
       });
       toast({ title: "Account Created!", description: "Welcome to AI Student Career Guide." });
@@ -71,178 +142,259 @@ export default function Register() {
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center relative p-4 bg-background">
-      <div className="fixed inset-0 mesh-gradient pointer-events-none z-0" />
-      <div className="absolute top-1/4 left-1/4 h-72 w-72 rounded-full bg-primary/10 filter blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-accent/10 filter blur-3xl pointer-events-none" />
+  const currentGoals = degree === "CSE" ? CSE_GOALS : BJMC_GOALS;
 
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="w-full max-w-lg relative z-10 my-8">
-        <Card className="glass-card shadow-2xl border-border/50">
-          <CardHeader className="text-center space-y-2">
-            <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto text-accent">
-              <GraduationCap className="h-7 w-7" />
+  return (
+    <div className="min-h-screen bg-slate-50/70 dark:bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors">
+      <motion.div 
+        initial={{ opacity: 0, y: 16 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.35, ease: "easeOut" }} 
+        className="sm:mx-auto sm:w-full sm:max-w-xl"
+      >
+        {/* Brand Header */}
+        <div className="text-center mb-6 space-y-2">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+            <GraduationCap className="h-6 w-6" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Create Student Profile</h1>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+            Choose your academic program to customize your AI career roadmap, resume scoring, and interview prep.
+          </p>
+        </div>
+
+        {/* Register Card */}
+        <Card className="border border-border/80 shadow-sm rounded-2xl bg-card">
+          <CardHeader className="space-y-3 pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-semibold tracking-tight text-foreground">Academic Program</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground">Select your stream</CardDescription>
+              </div>
             </div>
-            <CardTitle className="text-2xl font-bold gradient-text">Create Student Account</CardTitle>
-            <CardDescription>Join peer networks and master interview training</CardDescription>
+
+            {/* Degree Stream Selector Tabs */}
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => handleDegreeChange("CSE")}
+                className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 ${
+                  degree === "CSE" 
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/30" 
+                    : "border-border hover:bg-muted/40"
+                }`}
+              >
+                <div className={`p-2 rounded-lg shrink-0 ${degree === "CSE" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                  <Code2 className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-foreground">CSE & IT</span>
+                    {degree === "CSE" && <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />}
+                  </div>
+                  <span className="text-[10px] text-muted-foreground block leading-tight mt-0.5">
+                    Computer Science, Software, Web, AI/ML
+                  </span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleDegreeChange("BJMC")}
+                className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 ${
+                  degree === "BJMC" 
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/30" 
+                    : "border-border hover:bg-muted/40"
+                }`}
+              >
+                <div className={`p-2 rounded-lg shrink-0 ${degree === "BJMC" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                  <Newspaper className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-foreground">BJMC</span>
+                    {degree === "BJMC" && <CheckCircle2 className="h-3 w-3 text-primary shrink-0" />}
+                  </div>
+                  <span className="text-[10px] text-muted-foreground block leading-tight mt-0.5">
+                    Journalism, Media, PR, Video & Content
+                  </span>
+                </div>
+              </button>
+            </div>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleRegister} className="space-y-4">
+
+          <CardContent className="space-y-4 pt-1">
+            <form onSubmit={handleRegister} className="space-y-3.5">
               {errorMessage && (
-                <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 text-xs text-destructive flex items-start gap-2.5">
+                <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-xs text-destructive flex items-start gap-2.5">
                   <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                  <div className="flex-1 space-y-1.5">
-                    <p className="font-semibold text-foreground">{errorMessage}</p>
+                  <div className="flex-1 space-y-1">
+                    <p className="font-semibold">{errorMessage}</p>
                     {errorMessage.toLowerCase().includes("already exists") && (
-                      <div className="pt-1">
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => navigate(`/login?email=${encodeURIComponent(formData.email)}`)}
-                          className="h-8 text-xs gap-1.5 font-semibold w-full sm:w-auto"
-                        >
-                          Sign In With This Email <ArrowRight className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="link"
+                        onClick={() => navigate(`/login?email=${encodeURIComponent(formData.email)}`)}
+                        className="h-auto p-0 text-xs text-primary font-bold"
+                      >
+                        Sign in with this email instead <ArrowRight className="h-3 w-3 ml-1 inline" />
+                      </Button>
                     )}
                   </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+              {/* Personal Information */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="name" className="text-xs font-medium text-foreground">Full Name</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
                       id="name"
-                      placeholder="John Doe"
+                      placeholder="Alex Morgan"
                       value={formData.name}
                       onChange={(e) => handleInputChange("name", e.target.value)}
-                      className="pl-10"
+                      className="pl-8 h-9 text-xs"
                       required
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">College Email</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="email" className="text-xs font-medium text-foreground">Student Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
-                      placeholder="john@university.edu"
+                      placeholder="alex@college.edu"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
-                      className="pl-10"
+                      className="pl-8 h-9 text-xs"
                       required
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+              {/* Password with toggle */}
+              <div className="space-y-1">
+                <Label htmlFor="password" className="text-xs font-medium text-foreground">Password (Min 6 characters)</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
                     id="password"
-                    type="password"
-                    placeholder="•••••••• (Min 6 characters)"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
-                    className="pl-10"
+                    className="pl-8 pr-9 h-9 text-xs"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                  >
+                    {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="college">College/University</Label>
+              {/* University & Academic Status */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="space-y-1 sm:col-span-1">
+                  <Label htmlFor="college" className="text-xs font-medium text-foreground">College / University</Label>
                   <Input
                     id="college"
-                    placeholder="e.g. Stanford University"
+                    placeholder="e.g. Stanford / Amity"
                     value={formData.college}
                     onChange={(e) => handleInputChange("college", e.target.value)}
+                    className="h-9 text-xs"
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="course">Course/Degree</Label>
-                  <Input
-                    id="course"
-                    placeholder="e.g. B.Tech / M.S."
-                    value={formData.course}
-                    onChange={(e) => handleInputChange("course", e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="branch">Branch/Major</Label>
-                  <Input
-                    id="branch"
-                    placeholder="e.g. Computer Science"
-                    value={formData.branch}
-                    onChange={(e) => handleInputChange("branch", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="graduationYear">Graduation Year</Label>
-                  <Input
-                    id="graduationYear"
-                    type="number"
-                    placeholder="e.g. 2027"
-                    value={formData.graduationYear}
-                    onChange={(e) => handleInputChange("graduationYear", e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="careerGoal">Target Career Goal</Label>
-                  <Select onValueChange={(val) => handleInputChange("careerGoal", val)}>
-                    <SelectTrigger id="careerGoal">
-                      <SelectValue placeholder="Select career path" />
+                <div className="space-y-1">
+                  <Label htmlFor="academicYear" className="text-xs font-medium text-foreground">Current Year</Label>
+                  <Select 
+                    value={formData.academicYear} 
+                    onValueChange={(val) => handleInputChange("academicYear", val)}
+                  >
+                    <SelectTrigger id="academicYear" className="h-9 text-xs">
+                      <SelectValue placeholder="Year" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Frontend Developer">Frontend Developer</SelectItem>
-                      <SelectItem value="Backend Developer">Backend Developer</SelectItem>
-                      <SelectItem value="Full Stack Developer">Full Stack Developer</SelectItem>
-                      <SelectItem value="Data Analyst">Data Analyst</SelectItem>
-                      <SelectItem value="Python Developer">Python Developer</SelectItem>
-                      <SelectItem value="UI/UX Designer">UI/UX Designer</SelectItem>
-                      <SelectItem value="QA/SDET">QA / SDET</SelectItem>
+                      <SelectItem value="1">1st Year (Freshman)</SelectItem>
+                      <SelectItem value="2">2nd Year (Sophomore)</SelectItem>
+                      <SelectItem value="3">3rd Year (Junior)</SelectItem>
+                      <SelectItem value="4">4th Year (Final Year)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="skills">Skills (Comma separated)</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="graduationYear" className="text-xs font-medium text-foreground">Graduation Year</Label>
                   <Input
-                    id="skills"
-                    placeholder="HTML, CSS, React, JS"
-                    value={formData.skills}
-                    onChange={(e) => handleInputChange("skills", e.target.value)}
+                    id="graduationYear"
+                    type="number"
+                    placeholder="2025"
+                    value={formData.graduationYear}
+                    onChange={(e) => handleInputChange("graduationYear", e.target.value)}
+                    className="h-9 text-xs"
+                    required
                   />
                 </div>
               </div>
 
-              <Button type="submit" className="w-full gap-2 glow-accent mt-6" disabled={isLoading}>
-                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
-                Create Account
+              {/* Target Career Goal & Initial Skills */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="careerGoal" className="text-xs font-medium text-foreground">Target Role</Label>
+                  <Select 
+                    value={formData.careerGoal} 
+                    onValueChange={(val) => handleInputChange("careerGoal", val)}
+                  >
+                    <SelectTrigger id="careerGoal" className="h-9 text-xs">
+                      <SelectValue placeholder="Select target role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currentGoals.map((role) => (
+                        <SelectItem key={role} value={role}>{role}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="skills" className="text-xs font-medium text-foreground">Known Skills (comma separated)</Label>
+                  <Input
+                    id="skills"
+                    placeholder={degree === "CSE" ? "React, Python, SQL" : "Writing, Premiere, SEO"}
+                    value={formData.skills}
+                    onChange={(e) => handleInputChange("skills", e.target.value)}
+                    className="h-9 text-xs"
+                  />
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full h-10 text-xs font-semibold shadow-sm mt-3" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Creating account...
+                  </>
+                ) : (
+                  <>
+                    Complete Registration <ArrowRight className="h-3.5 w-3.5 ml-2" />
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex justify-center border-t border-border/20 pt-4">
-            <p className="text-sm text-muted-foreground">
+
+          <CardFooter className="flex justify-center border-t border-border/60 py-3 bg-muted/20 rounded-b-2xl">
+            <p className="text-xs text-muted-foreground">
               Already have an account?{" "}
-              <Link to="/login" className="text-primary font-medium hover:underline">
+              <Link to="/login" className="text-primary font-semibold hover:underline">
                 Sign in
               </Link>
             </p>

@@ -10,7 +10,7 @@ import { AuthenticatedRequest } from "../middleware/authMiddleware";
 const JWT_SECRET = process.env.JWT_SECRET || "ai_career_guide_secret_token_123456";
 
 export const register = async (req: Request, res: Response) => {
-  const { name, email, password, college, course, branch, graduationYear, skills, careerGoal } = req.body;
+  const { name, email, password, college, course, branch, graduationYear, skills, careerGoal, degree, academicYear } = req.body;
 
   try {
     if (!name || !email || !password || !college || !course || !branch || !graduationYear) {
@@ -31,6 +31,19 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "User already exists with this email" });
     }
 
+    // Determine degree (CSE vs BJMC)
+    let selectedDegree = degree;
+    if (!selectedDegree) {
+      const lower = `${course} ${branch}`.toLowerCase();
+      if (lower.includes("bjmc") || lower.includes("journalism") || lower.includes("mass comm")) {
+        selectedDegree = "BJMC";
+      } else {
+        selectedDegree = "CSE";
+      }
+    }
+
+    const currentYear = Number(academicYear) || 4;
+
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -47,6 +60,8 @@ export const register = async (req: Request, res: Response) => {
         college,
         course,
         branch,
+        degree: selectedDegree,
+        academicYear: currentYear,
         graduationYear: Number(graduationYear),
         skills: skillsArray,
         careerGoal: careerGoal || ""
@@ -56,7 +71,7 @@ export const register = async (req: Request, res: Response) => {
       fallbackDb.insert("profiles", {
         user: savedUser._id,
         avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-        bio: `Student at ${college}`,
+        bio: `${selectedDegree} Student at ${college}`,
         projects: [],
         achievements: [],
         resumeScore: 0,
@@ -75,6 +90,8 @@ export const register = async (req: Request, res: Response) => {
         college,
         course,
         branch,
+        degree: selectedDegree,
+        academicYear: currentYear,
         graduationYear: Number(graduationYear),
         skills: skillsArray,
         careerGoal: careerGoal || ""
@@ -85,7 +102,7 @@ export const register = async (req: Request, res: Response) => {
       const newProfile = new Profile({
         user: savedUser._id,
         avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-        bio: `Student at ${college}`,
+        bio: `${selectedDegree} Student at ${college}`,
         projects: [],
         achievements: [],
         resumeScore: 0,
@@ -112,6 +129,8 @@ export const register = async (req: Request, res: Response) => {
         college: savedUser.college,
         course: savedUser.course,
         branch: savedUser.branch,
+        degree: savedUser.degree || selectedDegree,
+        academicYear: savedUser.academicYear || currentYear,
         graduationYear: savedUser.graduationYear,
         skills: savedUser.skills,
         careerGoal: savedUser.careerGoal
@@ -165,6 +184,8 @@ export const login = async (req: Request, res: Response) => {
         college: user.college,
         course: user.course,
         branch: user.branch,
+        degree: user.degree || "CSE",
+        academicYear: user.academicYear || 4,
         graduationYear: user.graduationYear,
         skills: user.skills,
         careerGoal: user.careerGoal
@@ -203,6 +224,8 @@ export const getMe = async (req: AuthenticatedRequest, res: Response) => {
         college: user.college,
         course: user.course,
         branch: user.branch,
+        degree: user.degree || "CSE",
+        academicYear: user.academicYear || 4,
         graduationYear: user.graduationYear,
         skills: user.skills,
         careerGoal: user.careerGoal

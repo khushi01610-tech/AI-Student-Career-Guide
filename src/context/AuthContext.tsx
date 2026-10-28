@@ -8,6 +8,8 @@ interface UserType {
   college: string;
   course: string;
   branch: string;
+  degree?: "CSE" | "BJMC" | string;
+  academicYear?: number;
   graduationYear: number;
   skills: string[];
   careerGoal: string;
@@ -19,6 +21,9 @@ interface ProfileType {
   avatarUrl?: string;
   bio?: string;
   resumeUrl?: string;
+  resumeFileName?: string;
+  extractedResumeText?: string;
+  rubricBreakdown?: any;
   resumeScore?: number;
   atsScore?: number;
   formatScore?: number;
@@ -28,6 +33,7 @@ interface ProfileType {
   interviewScore?: number;
   communicationScore?: number;
   skillsCompleted?: number;
+  completedSkillsList?: string[];
   mockInterviewsCompleted?: number;
   communityContributions?: number;
   projects: any[];

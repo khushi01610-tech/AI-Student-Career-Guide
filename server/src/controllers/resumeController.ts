@@ -17,31 +17,60 @@ export const uploadAndAnalyzeResume = async (req: AuthenticatedRequest, res: Res
 
   try {
     const fileBuffer = fs.readFileSync(file.path);
-    const analysis = await aiService.analyzeResume(file.originalname, fileBuffer);
+    
+    // 1. Get student's registered degree preference
+    let user: any = null;
+    if (checkFallback()) {
+      user = fallbackDb.findById("users", userId!);
+    } else {
+      user = await User.findById(userId);
+    }
 
-    // Save file reference and analysis metrics
+    const preferredDegree = user?.degree || "CSE";
+
+    // 2. Extract plain text from PDF using pdf-parse
+    let extractedText = "";
+    try {
+      const pdfParse = require("pdf-parse");
+      const pdfData = await pdfParse(fileBuffer);
+      extractedText = pdfData.text || "";
+    } catch (parseErr) {
+      console.warn("pdf-parse encountered error, falling back to buffer decoding:", parseErr);
+      extractedText = fileBuffer.toString("utf-8").replace(/[^\x20-\x7E\n]/g, " ");
+    }
+
+    // 3. Analyze resume text with deterministic rubric & domain matching
+    const analysis = await aiService.analyzeResume(file.originalname, fileBuffer, extractedText, preferredDegree);
+
+    // 4. Save file reference and analysis metrics
     const resumeUrl = `/uploads/${file.filename}`;
+    const resumeFileName = file.originalname;
     
     let profile: any = null;
-    let user: any = null;
 
     if (checkFallback()) {
       // JSON db
       profile = fallbackDb.findOne("profiles", p => p.user === userId);
+      const updates = {
+        resumeUrl,
+        resumeFileName,
+        extractedResumeText: extractedText,
+        rubricBreakdown: analysis,
+        resumeScore: analysis.resumeScore,
+        atsScore: analysis.atsScore,
+        formatScore: analysis.formatScore,
+        keywordScore: analysis.keywordScore,
+        skillsScore: analysis.skillsScore,
+        projectScore: analysis.projectScore
+      };
+
       if (profile) {
-        profile = fallbackDb.findByIdAndUpdate("profiles", profile._id, {
-          resumeUrl,
-          resumeScore: analysis.resumeScore,
-          atsScore: analysis.atsScore,
-          formatScore: analysis.formatScore,
-          keywordScore: analysis.keywordScore,
-          skillsScore: analysis.skillsScore,
-          projectScore: analysis.projectScore
-        });
+        profile = fallbackDb.findByIdAndUpdate("profiles", profile._id, updates);
+      } else {
+        profile = fallbackDb.insert("profiles", { user: userId, ...updates });
       }
 
       // Sync skills to User record
-      user = fallbackDb.findById("users", userId!);
       if (user) {
         const mergedSkills = Array.from(new Set([...(user.skills || []), ...(analysis.skills || [])]));
         user = fallbackDb.findByIdAndUpdate("users", userId!, { skills: mergedSkills });
@@ -53,6 +82,9 @@ export const uploadAndAnalyzeResume = async (req: AuthenticatedRequest, res: Res
         {
           $set: {
             resumeUrl,
+            resumeFileName,
+            extractedResumeText: extractedText,
+            rubricBreakdown: analysis,
             resumeScore: analysis.resumeScore,
             atsScore: analysis.atsScore,
             formatScore: analysis.formatScore,
@@ -65,7 +97,6 @@ export const uploadAndAnalyzeResume = async (req: AuthenticatedRequest, res: Res
       );
 
       // Sync skills to User record
-      user = await User.findById(userId);
       if (user) {
         const mergedSkills = Array.from(new Set([...(user.skills || []), ...(analysis.skills || [])]));
         user.skills = mergedSkills;
@@ -76,7 +107,9 @@ export const uploadAndAnalyzeResume = async (req: AuthenticatedRequest, res: Res
     res.json({
       message: "Resume uploaded and analyzed successfully",
       resumeUrl,
-      analysis
+      resumeFileName,
+      analysis,
+      extractedText
     });
   } catch (error: any) {
     console.error("Resume upload/analyze error:", error);

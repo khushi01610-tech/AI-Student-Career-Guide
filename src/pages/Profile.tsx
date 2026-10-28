@@ -7,130 +7,270 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { 
   User, 
-  BookOpen, 
-  Award, 
   Trash2, 
-  Edit3, 
   PlusCircle, 
   Loader2, 
-  CheckCircle,
-  FileText,
-  Mail,
-  GraduationCap,
-  Briefcase
+  CheckCircle2, 
+  FileText, 
+  GraduationCap, 
+  Briefcase, 
+  ExternalLink,
+  Code2,
+  Newspaper,
+  Upload,
+  RefreshCw,
+  Sparkles,
+  FileEdit,
+  Check,
+  X,
+  Layers,
+  Award
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
+
+// Stream Skill Dictionaries
+const CSE_CATEGORIES: Record<string, string[]> = {
+  "Programming Languages": ["C", "C++", "Java", "Python", "JavaScript", "TypeScript", "SQL", "Go", "C#"],
+  "Web Development": ["HTML5", "CSS3", "React.js", "Next.js", "Node.js", "Express.js", "Tailwind CSS", "REST APIs"],
+  "Databases & Tools": ["MySQL", "PostgreSQL", "MongoDB", "Redis", "Git", "GitHub", "Docker", "Postman", "AWS"],
+  "Core CS Fundamentals": ["DSA", "OOP", "Operating Systems", "DBMS", "Computer Networks", "System Design"],
+  "Emerging Technologies": ["Machine Learning", "Artificial Intelligence", "Data Analytics", "Deep Learning", "Cybersecurity"]
+};
+
+const BJMC_CATEGORIES: Record<string, string[]> = {
+  "Journalism & Reporting": ["News Writing", "Reporting", "Copy Editing", "Fact-Checking", "Beat Reporting", "Investigative Journalism"],
+  "Digital Media & Content": ["Content Writing", "Copywriting", "SEO", "Blogging", "Social Media Management", "Digital Storytelling"],
+  "Broadcasting & Audio": ["Public Speaking", "Interviewing & Anchoring", "Radio/Podcast Production", "TV Journalism", "Speech Writing"],
+  "Production & Design": ["Video Editing", "Adobe Premiere Pro", "Canva", "Photoshop", "Audacity", "Photography"],
+  "PR & Brand Strategy": ["Public Relations", "Press Releases", "Brand Communication", "Crisis Management", "Media Relations"]
+};
+
+const CSE_CAREER_GOALS = [
+  "Full Stack Developer",
+  "Frontend Developer",
+  "Backend Developer",
+  "Data Analyst",
+  "Machine Learning Engineer",
+  "DevOps / Cloud Associate",
+  "QA Automation Engineer"
+];
+
+const BJMC_CAREER_GOALS = [
+  "Content Writer / Strategist",
+  "Digital Journalist / Reporter",
+  "PR & Brand Specialist",
+  "Social Media Manager",
+  "Video Producer / Editor",
+  "Broadcast Anchor / Assistant Producer"
+];
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState("portfolio");
   const { toast } = useToast();
 
-  // Editing credentials state
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [bio, setBio] = useState(profile?.bio || "");
+  const [activeTab, setActiveTab] = useState("skills");
+  const [degree, setDegree] = useState<"CSE" | "BJMC">(user?.degree === "BJMC" ? "BJMC" : "CSE");
+  const [academicYear, setAcademicYear] = useState<string>(String(user?.academicYear || "4"));
   const [careerGoal, setCareerGoal] = useState(user?.careerGoal || "");
-  const [skills, setSkills] = useState(user?.skills?.join(", ") || "");
-  const [avatarUrl, setAvatarUrl] = useState(profile?.avatarUrl || "");
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [activeSkills, setActiveSkills] = useState<string[]>(user?.skills || []);
+  const [customSkill, setCustomSkill] = useState("");
 
-  // Projects CRUD state
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingResume, setIsUploadingResume] = useState(false);
+  
+  // Project state
+  const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
   const [projectTitle, setProjectTitle] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
   const [projectTech, setProjectTech] = useState("");
   const [projectLink, setProjectLink] = useState("");
   const [isAddingProject, setIsAddingProject] = useState(false);
-  const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
 
-  // Achievements state
-  const [newAchievement, setNewAchievement] = useState("");
-  const [isAddingAchievement, setIsAddingAchievement] = useState(false);
-
-  // User posts lists state
-  const [myPosts, setMyPosts] = useState<any[]>([]);
-  const [savedPosts, setSavedPosts] = useState<any[]>([]);
-  const [isPostsLoading, setIsPostsLoading] = useState(false);
+  // Extracted text review dialog state
+  const [isTextReviewOpen, setIsTextReviewOpen] = useState(false);
+  const [reviewedText, setReviewedText] = useState("");
 
   useEffect(() => {
+    if (user) {
+      setDegree(user.degree === "BJMC" ? "BJMC" : "CSE");
+      setAcademicYear(String(user.academicYear || "4"));
+      setCareerGoal(user.careerGoal || "");
+      setActiveSkills(user.skills || []);
+    }
     if (profile) {
       setBio(profile.bio || "");
-      setAvatarUrl(profile.avatarUrl || "");
+      setReviewedText(profile.extractedResumeText || "");
     }
-    if (user) {
-      setCareerGoal(user.careerGoal || "");
-      setSkills(user.skills?.join(", ") || "");
-    }
-    
-    // Load student community contributions & bookmarks
-    const loadUserPosts = async () => {
-      if (!user) return;
-      setIsPostsLoading(true);
-      try {
-        const allPosts = await api.posts.get({ isHubResource: false });
-        const allHub = await api.posts.get({ isHubResource: true });
-        const consolidated = [...allPosts, ...allHub];
-        
-        setMyPosts(consolidated.filter(p => p.author === user.id));
-        setSavedPosts(consolidated.filter(p => p.savedBy?.includes(user.id)));
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setIsPostsLoading(false);
-      }
-    };
-    loadUserPosts();
   }, [user, profile]);
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
+  // Toggle skill inclusion
+  const handleToggleSkill = (skill: string) => {
+    const exists = activeSkills.some(s => s.toLowerCase() === skill.toLowerCase());
+    if (exists) {
+      setActiveSkills(prev => prev.filter(s => s.toLowerCase() !== skill.toLowerCase()));
+    } else {
+      setActiveSkills(prev => [...prev, skill]);
+    }
+  };
+
+  // Add custom typed skill
+  const handleAddCustomSkill = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSavingProfile(true);
+    if (!customSkill.trim()) return;
+    const trimmed = customSkill.trim();
+    if (!activeSkills.some(s => s.toLowerCase() === trimmed.toLowerCase())) {
+      setActiveSkills(prev => [...prev, trimmed]);
+      toast({ title: "Skill Added", description: `Added ${trimmed} to your profile.` });
+    }
+    setCustomSkill("");
+  };
+
+  // Switch degree stream
+  const handleSwitchDegree = async (newDegree: "CSE" | "BJMC") => {
+    setDegree(newDegree);
+    const defaultGoal = newDegree === "CSE" ? "Full Stack Developer" : "Digital Journalist / Reporter";
+    setCareerGoal(defaultGoal);
+
+    try {
+      await api.profile.update({
+        degree: newDegree,
+        careerGoal: defaultGoal
+      });
+      await refreshProfile();
+      toast({
+        title: "Stream Switched!",
+        description: `Your profile has been set to ${newDegree}. Skill libraries and role recommendations are updated.`
+      });
+    } catch (e: any) {
+      toast({ title: "Failed to switch stream", description: e.message, variant: "destructive" });
+    }
+  };
+
+  // Save all profile credentials
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
     try {
       await api.profile.update({
         bio,
         careerGoal,
-        skills: skills.split(",").map(s => s.trim()),
-        avatarUrl
+        degree,
+        academicYear: Number(academicYear),
+        skills: activeSkills
       });
       await refreshProfile();
-      setIsEditingProfile(false);
-      toast({ title: "Profile Updated!", description: "Your student details have been saved." });
-    } catch (e: any) {
-      toast({ title: "Failed", description: e.message || "Could not update credentials.", variant: "destructive" });
+      toast({ title: "Profile Saved!", description: "All changes updated successfully." });
+    } catch (err: any) {
+      toast({ title: "Save Failed", description: err.message, variant: "destructive" });
     } finally {
-      setIsSavingProfile(false);
+      setIsSaving(false);
     }
   };
 
+  // Resume upload handler
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast({ title: "Invalid File Format", description: "Only PDF resumes are supported.", variant: "destructive" });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File Too Large", description: "Maximum resume file size is 10MB.", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingResume(true);
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+
+      const res = await api.resume.analyze(formData);
+      await refreshProfile();
+      
+      if (res.analysis?.skills) {
+        // Merge extracted skills
+        const merged = Array.from(new Set([...activeSkills, ...res.analysis.skills]));
+        setActiveSkills(merged);
+      }
+
+      setReviewedText(res.extractedText || "");
+      toast({
+        title: "Resume Analyzed Successfully! 🚀",
+        description: `ATS Score: ${res.analysis.atsScore}/100 with ${res.analysis.skills?.length || 0} skills detected.`
+      });
+    } catch (err: any) {
+      toast({ title: "Upload Failed", description: err.message || "Failed to process resume.", variant: "destructive" });
+    } finally {
+      setIsUploadingResume(false);
+    }
+  };
+
+  // Remove resume
+  const handleRemoveResume = async () => {
+    try {
+      await api.profile.update({
+        resumeUrl: "",
+        resumeFileName: "",
+        extractedResumeText: "",
+        resumeScore: 0,
+        atsScore: 0
+      });
+      await refreshProfile();
+      setReviewedText("");
+      toast({ title: "Resume Removed", description: "Resume file reference cleared." });
+    } catch (err: any) {
+      toast({ title: "Failed to remove resume", description: err.message, variant: "destructive" });
+    }
+  };
+
+  // Save reviewed resume text
+  const handleSaveReviewedText = async () => {
+    try {
+      await api.profile.update({
+        extractedResumeText: reviewedText
+      });
+      await refreshProfile();
+      setIsTextReviewOpen(false);
+      toast({ title: "Extracted Text Updated", description: "Resume summary saved to profile." });
+    } catch (err: any) {
+      toast({ title: "Update Failed", description: err.message, variant: "destructive" });
+    }
+  };
+
+  // Add Project
   const handleAddProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!projectTitle || !projectDesc) return;
+    if (!projectTitle.trim() || !projectDesc.trim()) return;
     setIsAddingProject(true);
 
     try {
       const currentProjects = profile?.projects || [];
       const newProj = {
-        title: projectTitle,
-        description: projectDesc,
-        technologies: projectTech.split(",").map(t => t.trim()),
-        link: projectLink || undefined
+        title: projectTitle.trim(),
+        description: projectDesc.trim(),
+        technologies: projectTech.split(",").map(t => t.trim()).filter(Boolean),
+        link: projectLink.trim() || undefined
       };
 
       await api.profile.update({
         projects: [...currentProjects, newProj]
       });
-      
       await refreshProfile();
       setProjectTitle("");
       setProjectDesc("");
       setProjectTech("");
       setProjectLink("");
       setIsProjectDialogOpen(false);
-      toast({ title: "Project Added!", description: "Included project card in portfolio." });
+      toast({ title: "Project Added!", description: "Portfolio item saved." });
     } catch (e: any) {
       toast({ title: "Failed", description: e.message || "Could not add project.", variant: "destructive" });
     } finally {
@@ -138,317 +278,508 @@ export default function Profile() {
     }
   };
 
-  const handleDeleteProject = async (projIdx: number) => {
-    const currentProjects = profile?.projects || [];
-    const updated = [...currentProjects];
-    updated.splice(projIdx, 1);
+  const handleDeleteProject = async (idx: number) => {
+    const current = profile?.projects || [];
+    const updated = [...current];
+    updated.splice(idx, 1);
 
     try {
       await api.profile.update({ projects: updated });
       await refreshProfile();
-      toast({ title: "Project Removed", description: "Portfolio card deleted." });
+      toast({ title: "Project Removed", description: "Deleted portfolio card." });
     } catch (e: any) {
-      toast({ title: "Failed", description: e.message || "Error deleting project.", variant: "destructive" });
+      toast({ title: "Failed", description: e.message, variant: "destructive" });
     }
   };
 
-  const handleAddAchievement = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newAchievement.trim()) return;
-    setIsAddingAchievement(true);
-
-    try {
-      const list = profile?.achievements || [];
-      await api.profile.update({
-        achievements: [...list, newAchievement]
-      });
-
-      await refreshProfile();
-      setNewAchievement("");
-      toast({ title: "Achievement Added!", description: "Portfolio achievements updated." });
-    } catch (e: any) {
-      toast({ title: "Failed", description: e.message || "Could not save achievement.", variant: "destructive" });
-    } finally {
-      setIsAddingAchievement(false);
-    }
-  };
-
-  const handleDeleteAchievement = async (achIdx: number) => {
-    const currentList = profile?.achievements || [];
-    const updated = [...currentList];
-    updated.splice(achIdx, 1);
-
-    try {
-      await api.profile.update({ achievements: updated });
-      await refreshProfile();
-      toast({ title: "Achievement Deleted", description: "Removed from accomplishments list." });
-    } catch (e: any) {
-      toast({ title: "Failed", description: e.message || "Error deleting achievement.", variant: "destructive" });
-    }
-  };
-
-  const displayAvatar = avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.name || "Student")}`;
+  const activeCategories = degree === "CSE" ? CSE_CATEGORIES : BJMC_CATEGORIES;
+  const currentGoalOptions = degree === "CSE" ? CSE_CAREER_GOALS : BJMC_CAREER_GOALS;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Upper Cover and details */}
-      <Card className="glass-card overflow-hidden relative border-border/40">
-        <div className="h-28 bg-gradient-to-r from-primary/30 to-accent/30 relative" />
-        <CardContent className="p-6 pt-0 relative z-10 flex flex-col sm:flex-row items-start sm:items-end gap-5 -mt-12 border-b border-border/10 pb-6">
-          <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-card bg-card shadow-lg shrink-0">
-            <img src={displayAvatar} alt={user?.name} className="h-full w-full object-cover" />
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h1 className="text-xl font-bold text-foreground">{user?.name}</h1>
-                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                  <GraduationCap className="h-4 w-4" /> {user?.course} in {user?.branch} • {user?.college}
+    <div className="space-y-6">
+      {/* Header Profile Card */}
+      <Card className="border border-border shadow-sm bg-card rounded-2xl overflow-hidden">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-2xl overflow-hidden border-2 border-border bg-muted shrink-0 shadow-sm">
+                <img 
+                  src={profile?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.name || "Student")}`}
+                  alt="Student Avatar"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-xl font-bold tracking-tight text-foreground">{user?.name}</h1>
+                  <Badge variant="outline" className="font-mono text-xs font-bold border-primary/30 text-primary bg-primary/5">
+                    {degree === "CSE" ? "CSE • Computer Science" : "BJMC • Media & Mass Comm"}
+                  </Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    Year {academicYear}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <GraduationCap className="h-3.5 w-3.5" /> {user?.college} • {user?.course}
+                </p>
+                <p className="text-xs text-foreground font-medium flex items-center gap-1.5 pt-0.5">
+                  <Briefcase className="h-3.5 w-3.5 text-primary" /> Target Role: <span className="text-primary font-bold">{careerGoal || "Not set yet"}</span>
                 </p>
               </div>
-              
-              <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-                    <Edit3 className="h-3.5 w-3.5" /> Edit Profile
+            </div>
+
+            {/* Quick Metrics & Stream Switcher */}
+            <div className="flex items-center gap-4 border-t md:border-t-0 md:border-l border-border pt-4 md:pt-0 md:pl-6">
+              <div className="text-center px-2">
+                <span className="text-2xl font-black text-foreground">{profile?.atsScore || 0}</span>
+                <span className="block text-[10px] uppercase font-bold text-muted-foreground">ATS Score</span>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div className="text-center px-2">
+                <span className="text-2xl font-black text-primary">{activeSkills.length}</span>
+                <span className="block text-[10px] uppercase font-bold text-muted-foreground">Skills Saved</span>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div className="space-y-1">
+                <span className="block text-[10px] font-bold text-muted-foreground uppercase">Degree Stream</span>
+                <div className="flex items-center gap-1 bg-muted p-1 rounded-lg border border-border">
+                  <Button
+                    size="sm"
+                    variant={degree === "CSE" ? "default" : "ghost"}
+                    onClick={() => handleSwitchDegree("CSE")}
+                    className="h-6 text-[10px] px-2 font-bold"
+                  >
+                    CSE
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-card border border-border/50">
-                  <DialogHeader>
-                    <DialogTitle>Edit Profile Details</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleUpdateProfile} className="space-y-4">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="edit-bio">Short Biography</Label>
-                      <Textarea id="edit-bio" rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder="Aspiring Full Stack Engineer at Stanford..." />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="edit-goal">Target Career Goal</Label>
-                      <Input id="edit-goal" value={careerGoal} onChange={e => setCareerGoal(e.target.value)} placeholder="e.g. Frontend Developer" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="edit-skills">Skills (Comma-separated)</Label>
-                      <Input id="edit-skills" value={skills} onChange={e => setSkills(e.target.value)} placeholder="React, Node.js, TS" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="edit-avatar">Avatar Seed/URL</Label>
-                      <Input id="edit-avatar" value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} placeholder="DICE image link or username seed" />
-                    </div>
-                    <Button type="submit" className="w-full gap-1.5" disabled={isSavingProfile}>
-                      {isSavingProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                  <Button
+                    size="sm"
+                    variant={degree === "BJMC" ? "default" : "ghost"}
+                    onClick={() => handleSwitchDegree("BJMC")}
+                    className="h-6 text-[10px] px-2 font-bold"
+                  >
+                    BJMC
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
-        
-        {/* Core Stats Overview block */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 text-center p-3 divide-y-0 divide-x border-t divide-border/20 text-xs text-muted-foreground bg-muted/10">
-          <div>
-            <span className="block font-bold text-foreground text-sm">{profile?.resumeScore || 0}%</span>
-            <span>Resume Scan</span>
-          </div>
-          <div>
-            <span className="block font-bold text-foreground text-sm">{profile?.interviewScore || 0}%</span>
-            <span>Mock Marks</span>
-          </div>
-          <div>
-            <span className="block font-bold text-foreground text-sm">{profile?.communicationScore || 0}%</span>
-            <span>Speaking Score</span>
-          </div>
-          <div>
-            <span className="block font-bold text-foreground text-sm">{profile?.communityContributions || 0}</span>
-            <span>Contributions</span>
-          </div>
-        </div>
       </Card>
 
-      {/* Profile Sections tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="max-w-md grid grid-cols-3 mb-6 bg-card border border-border/30">
-          <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-          <TabsTrigger value="posts">My Posts</TabsTrigger>
-          <TabsTrigger value="saved">Bookmarks</TabsTrigger>
+      {/* Tabs Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="bg-muted/70 p-1 border border-border rounded-xl">
+          <TabsTrigger value="skills" className="text-xs font-semibold gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm">
+            <Sparkles className="h-3.5 w-3.5" /> Skills & Competencies ({activeSkills.length})
+          </TabsTrigger>
+          <TabsTrigger value="resume" className="text-xs font-semibold gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm">
+            <FileText className="h-3.5 w-3.5" /> Resume & ATS Data
+          </TabsTrigger>
+          <TabsTrigger value="portfolio" className="text-xs font-semibold gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm">
+            <Briefcase className="h-3.5 w-3.5" /> Projects & Portfolio ({profile?.projects?.length || 0})
+          </TabsTrigger>
+          <TabsTrigger value="academic" className="text-xs font-semibold gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm">
+            <GraduationCap className="h-3.5 w-3.5" /> Academic & Target Goal
+          </TabsTrigger>
         </TabsList>
 
-        {/* Tab 1: Portfolio (Projects + Achievements) */}
-        <TabsContent value="portfolio" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Projects list */}
-            <div className="lg:col-span-2 space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-base font-bold text-foreground flex items-center gap-1.5">
-                  <Briefcase className="h-4.5 w-4.5 text-primary" /> Key Code Projects
-                </h2>
-                
+        {/* TAB 1: SKILLS PICKER */}
+        <TabsContent value="skills" className="space-y-4">
+          <Card className="border border-border bg-card shadow-sm rounded-2xl">
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <CardTitle className="text-base font-bold text-foreground">
+                    {degree === "CSE" ? "Computer Science & Engineering Skills" : "Journalism & Mass Comm Skills"}
+                  </CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground">
+                    Click any skill badge to toggle it on/off in your candidate profile.
+                  </CardDescription>
+                </div>
+                <Button 
+                  size="sm" 
+                  onClick={handleSaveProfile} 
+                  disabled={isSaving}
+                  className="text-xs h-8 font-semibold gap-1.5"
+                >
+                  {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                  Save Skills Changes
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Category Groups */}
+              {Object.entries(activeCategories).map(([catTitle, catSkills]) => (
+                <div key={catTitle} className="space-y-2">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                    {catTitle}
+                  </h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {catSkills.map(skill => {
+                      const isSelected = activeSkills.some(s => s.toLowerCase() === skill.toLowerCase());
+                      return (
+                        <button
+                          key={skill}
+                          type="button"
+                          onClick={() => handleToggleSkill(skill)}
+                          className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition-all flex items-center gap-1.5 ${
+                            isSelected 
+                              ? "bg-primary text-primary-foreground border-primary shadow-xs font-semibold" 
+                              : "bg-muted/40 hover:bg-muted text-foreground border-border hover:border-border/80"
+                          }`}
+                        >
+                          {isSelected ? <Check className="h-3 w-3" /> : <PlusCircle className="h-3 w-3 text-muted-foreground" />}
+                          {skill}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {/* Add Custom Skill */}
+              <div className="pt-4 border-t border-border">
+                <form onSubmit={handleAddCustomSkill} className="flex gap-2 max-w-md">
+                  <Input
+                    placeholder="Add custom unlisted skill..."
+                    value={customSkill}
+                    onChange={(e) => setCustomSkill(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                  <Button type="submit" size="sm" variant="outline" className="text-xs h-8 font-semibold shrink-0">
+                    <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add Skill
+                  </Button>
+                </form>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* TAB 2: RESUME & ATS DATA */}
+        <TabsContent value="resume" className="space-y-4">
+          <Card className="border border-border bg-card shadow-sm rounded-2xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-bold text-foreground">Resume PDF & ATS Compatibility</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">
+                Upload your genuine resume to extract ATS keywords, verify contact info, and calculate placement scores.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Status Box */}
+              <div className="p-4 rounded-xl border border-border bg-muted/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground">
+                      {profile?.resumeFileName || (profile?.resumeUrl ? "Uploaded Resume.pdf" : "No resume uploaded yet")}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {profile?.resumeUrl ? "Active in university placement index" : "Upload a 1-page PDF to extract credentials"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    id="resume-file-input"
+                    type="file"
+                    accept=".pdf"
+                    className="hidden"
+                    onChange={handleResumeUpload}
+                  />
+                  <Button
+                    size="sm"
+                    onClick={() => document.getElementById("resume-file-input")?.click()}
+                    disabled={isUploadingResume}
+                    className="text-xs h-8 font-semibold gap-1.5"
+                  >
+                    {isUploadingResume ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        Extracting PDF...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-3.5 w-3.5" />
+                        {profile?.resumeUrl ? "Replace Resume" : "Upload PDF Resume"}
+                      </>
+                    )}
+                  </Button>
+
+                  {profile?.resumeUrl && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleRemoveResume}
+                      className="text-xs h-8 text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Extracted Resume Text & Editable Review Modal */}
+              {profile?.extractedResumeText && (
+                <div className="p-4 rounded-xl border border-border/80 bg-card space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Extracted Resume Plain Text
+                      </h4>
+                      <p className="text-[11px] text-muted-foreground">
+                        Verified by pdf-parse. You can edit this text below to refine your candidate profile.
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setIsTextReviewOpen(true)}
+                      className="text-xs h-7 font-semibold gap-1"
+                    >
+                      <FileEdit className="h-3.5 w-3.5" /> Edit Parsed Text
+                    </Button>
+                  </div>
+
+                  <div className="max-h-48 overflow-y-auto p-3 rounded-lg bg-muted/40 border border-border/60 text-xs font-mono text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {profile.extractedResumeText}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* TAB 3: PROJECTS & PORTFOLIO */}
+        <TabsContent value="portfolio" className="space-y-4">
+          <Card className="border border-border bg-card shadow-sm rounded-2xl">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-bold text-foreground">
+                    {degree === "CSE" ? "Technical Projects & Repositories" : "Media Samples, Articles & Video Portfolio"}
+                  </CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground">
+                    Featured work samples showcased to campus interviewers and recruiters.
+                  </CardDescription>
+                </div>
                 <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm" variant="outline" className="gap-1 text-[10px] h-7 px-2">
+                    <Button size="sm" className="text-xs h-8 font-semibold gap-1.5">
                       <PlusCircle className="h-3.5 w-3.5" /> Add Project
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-card border border-border/50">
+                  <DialogContent className="max-w-md bg-card border border-border">
                     <DialogHeader>
-                      <DialogTitle>Add Project Card</DialogTitle>
+                      <DialogTitle className="text-base font-bold">
+                        {degree === "CSE" ? "Add Engineering Project" : "Add Media Work Sample"}
+                      </DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleAddProject} className="space-y-4">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="proj-title">Project Title</Label>
-                        <Input id="proj-title" placeholder="e.g. AI Search Optimizer" value={projectTitle} onChange={e => setProjectTitle(e.target.value)} required />
+                    <form onSubmit={handleAddProject} className="space-y-3 pt-2">
+                      <div className="space-y-1">
+                        <Label htmlFor="proj-title" className="text-xs font-medium">Title</Label>
+                        <Input
+                          id="proj-title"
+                          placeholder={degree === "CSE" ? "e.g. Distributed Task Queue" : "e.g. Campus Investigative Report"}
+                          value={projectTitle}
+                          onChange={(e) => setProjectTitle(e.target.value)}
+                          className="h-8 text-xs"
+                          required
+                        />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="proj-desc">Description</Label>
-                        <Textarea id="proj-desc" rows={3} placeholder="Describe implementation steps and STAR metrics..." value={projectDesc} onChange={e => setProjectDesc(e.target.value)} required />
+                      <div className="space-y-1">
+                        <Label htmlFor="proj-desc" className="text-xs font-medium">Description</Label>
+                        <Textarea
+                          id="proj-desc"
+                          placeholder="Describe the problem, implementation, and measurable result..."
+                          value={projectDesc}
+                          onChange={(e) => setProjectDesc(e.target.value)}
+                          className="text-xs min-h-[80px]"
+                          required
+                        />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="proj-tech">Technologies (Comma-separated)</Label>
-                        <Input id="proj-tech" placeholder="Python, ElasticSearch" value={projectTech} onChange={e => setProjectTech(e.target.value)} />
+                      <div className="space-y-1">
+                        <Label htmlFor="proj-tech" className="text-xs font-medium">
+                          {degree === "CSE" ? "Technologies Used (comma separated)" : "Tools & Topics"}
+                        </Label>
+                        <Input
+                          id="proj-tech"
+                          placeholder={degree === "CSE" ? "React, Node.js, MongoDB" : "Premiere Pro, Audacity, AP Style"}
+                          value={projectTech}
+                          onChange={(e) => setProjectTech(e.target.value)}
+                          className="h-8 text-xs"
+                        />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="proj-link">Deployment/Github URL (Optional)</Label>
-                        <Input id="proj-link" placeholder="https://github.com/..." value={projectLink} onChange={e => setProjectLink(e.target.value)} />
+                      <div className="space-y-1">
+                        <Label htmlFor="proj-link" className="text-xs font-medium">URL (GitHub / Live Link / Article)</Label>
+                        <Input
+                          id="proj-link"
+                          placeholder="https://..."
+                          value={projectLink}
+                          onChange={(e) => setProjectLink(e.target.value)}
+                          className="h-8 text-xs"
+                        />
                       </div>
-                      <Button type="submit" className="w-full gap-1.5" disabled={isAddingProject}>
-                        {isAddingProject ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Project"}
+                      <Button type="submit" size="sm" className="w-full text-xs h-8 font-semibold mt-2" disabled={isAddingProject}>
+                        {isAddingProject ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Check className="h-3.5 w-3.5 mr-1" />}
+                        Save Project to Portfolio
                       </Button>
                     </form>
                   </DialogContent>
                 </Dialog>
               </div>
-
-              {/* Projects Display */}
+            </CardHeader>
+            <CardContent>
               {(!profile?.projects || profile.projects.length === 0) ? (
-                <Card className="glass-card text-center py-10 text-muted-foreground">
-                  <CardContent className="text-xs">No project cards added. Include key assignments to boost project score.</CardContent>
-                </Card>
+                <div className="text-center py-10 border border-dashed border-border rounded-xl">
+                  <Briefcase className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                  <p className="text-xs font-semibold text-foreground">No portfolio items added yet</p>
+                  <p className="text-[11px] text-muted-foreground max-w-xs mx-auto mt-1">
+                    Add your best 2-3 projects to prove practical competence to campus placement coordinators.
+                  </p>
+                </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {profile.projects.map((proj: any, idx: number) => (
-                    <Card key={idx} className="glass-card">
-                      <CardHeader className="p-4 flex flex-row items-start justify-between gap-3 pb-2">
-                        <div>
-                          <CardTitle className="text-xs font-bold text-foreground">{proj.title}</CardTitle>
-                          {proj.link && (
-                            <a href={proj.link} target="_blank" rel="noreferrer" className="text-[10px] text-primary hover:underline">{proj.link}</a>
-                          )}
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                    <div key={idx} className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-2 relative group">
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="text-xs font-bold text-foreground">{proj.title}</h4>
+                        <button
+                          type="button"
                           onClick={() => handleDeleteProject(idx)}
-                          className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                          title="Delete project"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-0 text-[11px] text-muted-foreground leading-relaxed">
-                        <p>{proj.description}</p>
-                        <div className="flex flex-wrap gap-1 mt-2.5">
-                          {proj.technologies?.map((tech: string) => (
-                            <Badge key={tech} variant="secondary" className="text-[8px] px-1.5 py-0.5">{tech}</Badge>
+                        </button>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {proj.description}
+                      </p>
+                      {proj.technologies && proj.technologies.length > 0 && (
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {proj.technologies.map((t: string) => (
+                            <Badge key={t} variant="secondary" className="text-[10px] px-1.5 py-0">
+                              {t}
+                            </Badge>
                           ))}
                         </div>
-                      </CardContent>
-                    </Card>
+                      )}
+                      {proj.link && (
+                        <a 
+                          href={proj.link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-semibold pt-1"
+                        >
+                          View Work <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* Achievements list */}
-            <div>
-              <Card className="glass-card h-full">
-                <CardHeader className="pb-3"><CardTitle className="text-sm font-bold flex items-center gap-1.5"><Award className="h-4.5 w-4.5 text-accent" /> Accomplishments</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <form onSubmit={handleAddAchievement} className="flex gap-2">
-                    <Input 
-                      placeholder="Add certification/award..." 
-                      value={newAchievement} 
-                      onChange={e => setNewAchievement(e.target.value)}
-                      disabled={isAddingAchievement}
-                      className="text-xs h-9"
-                    />
-                    <Button type="submit" size="icon" disabled={isAddingAchievement || !newAchievement.trim()} className="h-9 w-9 shrink-0">
-                      {isAddingAchievement ? <Loader2 className="h-3 w-3 animate-spin" /> : <PlusCircle className="h-4 w-4" />}
-                    </Button>
-                  </form>
-
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {(!profile?.achievements || profile.achievements.length === 0) ? (
-                      <p className="text-center py-6 text-[10px] text-muted-foreground">List Hackathons or certificates.</p>
-                    ) : (
-                      profile.achievements.map((ach: string, idx: number) => (
-                        <div key={idx} className="p-2.5 rounded-lg border border-border/40 flex justify-between items-center gap-3 bg-muted/15 text-[11px]">
-                          <span className="text-muted-foreground font-medium flex items-center gap-1.5">
-                            <CheckCircle className="h-3.5 w-3.5 text-primary shrink-0" /> {ach}
-                          </span>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => handleDeleteAchievement(idx)}
-                            className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        {/* Tab 2: User Published Posts */}
-        <TabsContent value="posts" className="space-y-4">
-          {isPostsLoading ? (
-            <div className="py-12 text-center text-xs text-muted-foreground animate-pulse">Loading published feeds...</div>
-          ) : myPosts.length === 0 ? (
-            <p className="text-center py-12 text-xs text-muted-foreground">You haven't posted any placement tips on the forums yet.</p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {myPosts.map((post) => (
-                <Card key={post._id} className="glass-card">
-                  <CardHeader className="p-4 border-b border-border/10 py-2.5 flex flex-row justify-between items-center bg-muted/10">
-                    <span className="text-[10px] font-bold text-primary uppercase">{post.tags?.[0] || "General"}</span>
-                    <span className="text-[9px] text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</span>
-                  </CardHeader>
-                  <CardContent className="p-4 text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">{post.content}</CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+        {/* TAB 4: ACADEMIC CREDENTIALS */}
+        <TabsContent value="academic" className="space-y-4">
+          <Card className="border border-border bg-card shadow-sm rounded-2xl">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-bold text-foreground">Academic Status & Career Goals</CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">
+                Set your university placement parameters and target role.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 max-w-lg">
+              <div className="space-y-1.5">
+                <Label htmlFor="target-career-goal" className="text-xs font-semibold text-foreground">
+                  Target Role / Career Goal
+                </Label>
+                <Select value={careerGoal} onValueChange={setCareerGoal}>
+                  <SelectTrigger id="target-career-goal" className="h-9 text-xs">
+                    <SelectValue placeholder="Select target role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currentGoalOptions.map(goal => (
+                      <SelectItem key={goal} value={goal}>{goal}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-        {/* Tab 3: Saved/Bookmarked posts */}
-        <TabsContent value="saved" className="space-y-4">
-          {isPostsLoading ? (
-            <div className="py-12 text-center text-xs text-muted-foreground animate-pulse">Loading saved guides...</div>
-          ) : savedPosts.length === 0 ? (
-            <p className="text-center py-12 text-xs text-muted-foreground">No bookmarked threads. Bookmark tips from Career Hub to review them here.</p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {savedPosts.map((post) => (
-                <Card key={post._id} className="glass-card">
-                  <CardHeader className="p-4 border-b border-border/10 py-2.5 flex flex-row items-center gap-3 bg-muted/10 justify-between">
-                    <div className="min-w-0 text-[10px]">
-                      <span className="font-bold text-foreground block">{post.authorName}</span>
-                      <span className="text-muted-foreground truncate">{post.authorCollege}</span>
-                    </div>
-                    <Badge variant="outline" className="text-[8px] uppercase">{post.category || post.tags?.[0] || "Hub"}</Badge>
-                  </CardHeader>
-                  <CardContent className="p-4 text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">{post.content}</CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+              <div className="space-y-1.5">
+                <Label htmlFor="acad-year" className="text-xs font-semibold text-foreground">
+                  Academic Year
+                </Label>
+                <Select value={academicYear} onValueChange={setAcademicYear}>
+                  <SelectTrigger id="acad-year" className="h-9 text-xs">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1st Year (Freshman)</SelectItem>
+                    <SelectItem value="2">2nd Year (Sophomore)</SelectItem>
+                    <SelectItem value="3">3rd Year (Junior)</SelectItem>
+                    <SelectItem value="4">4th Year (Final Year / Placement)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="bio" className="text-xs font-semibold text-foreground">
+                  Student Bio / Placement Statement
+                </Label>
+                <Textarea
+                  id="bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Summary of student career interests..."
+                  className="text-xs min-h-[90px]"
+                />
+              </div>
+
+              <Button
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+                className="text-xs h-9 font-semibold gap-1.5"
+              >
+                {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                Save Academic Parameters
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Editable Text Review Dialog */}
+      <Dialog open={isTextReviewOpen} onOpenChange={setIsTextReviewOpen}>
+        <DialogContent className="max-w-2xl bg-card border border-border">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold">Review Extracted Resume Text</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <p className="text-xs text-muted-foreground">
+              You can edit the plain-text resume content directly. When saved, our ATS parser uses this text to evaluate keywords and formatting.
+            </p>
+            <Textarea
+              value={reviewedText}
+              onChange={(e) => setReviewedText(e.target.value)}
+              className="text-xs font-mono min-h-[280px] leading-relaxed"
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button size="sm" variant="ghost" onClick={() => setIsTextReviewOpen(false)} className="text-xs h-8">
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleSaveReviewedText} className="text-xs h-8 font-semibold">
+                Save Extracted Content
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

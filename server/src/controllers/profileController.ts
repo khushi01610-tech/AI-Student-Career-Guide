@@ -91,6 +91,8 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
         college: user.college,
         course: user.course,
         branch: user.branch,
+        degree: user.degree || "CSE",
+        academicYear: user.academicYear || 4,
         graduationYear: user.graduationYear,
         skills: user.skills,
         careerGoal: user.careerGoal
@@ -105,16 +107,18 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
 
 export const updateProfile = async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.userId;
-  const { bio, projects, achievements, avatarUrl, skills, careerGoal } = req.body;
+  const { bio, projects, achievements, avatarUrl, skills, careerGoal, degree, academicYear } = req.body;
 
   try {
     let user: any = null;
     let profile: any = null;
 
-    // 1. Update user credentials (skills, careerGoal) if provided
+    // 1. Update user credentials (skills, careerGoal, degree, academicYear) if provided
     const userUpdates: any = {};
     if (skills !== undefined) userUpdates.skills = Array.isArray(skills) ? skills : typeof skills === "string" ? skills.split(",").map((s: string) => s.trim()) : [];
     if (careerGoal !== undefined) userUpdates.careerGoal = careerGoal;
+    if (degree !== undefined) userUpdates.degree = degree;
+    if (academicYear !== undefined) userUpdates.academicYear = Number(academicYear);
 
     if (checkFallback()) {
       user = fallbackDb.findByIdAndUpdate("users", userId!, userUpdates);
@@ -157,6 +161,8 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response) =>
         college: user.college,
         course: user.course,
         branch: user.branch,
+        degree: user.degree || "CSE",
+        academicYear: user.academicYear || 4,
         graduationYear: user.graduationYear,
         skills: user.skills,
         careerGoal: user.careerGoal
@@ -244,6 +250,8 @@ export const getDashboardData = async (req: AuthenticatedRequest, res: Response)
     res.json({
       userName: user.name,
       college: user.college,
+      degree: user.degree || "CSE",
+      academicYear: user.academicYear || 4,
       careerGoal: user.careerGoal || "Set your Career Goal",
       readinessScore,
       resumeScore: profile.resumeScore || 0,

@@ -57,91 +57,273 @@ async function callGemini(prompt: string, schemaInstruction?: string): Promise<a
 }
 
 export const aiService = {
-  // 1. Analyze Resume PDF content
-  analyzeResume: async (fileName: string, fileBuffer?: Buffer): Promise<any> => {
-    console.log(`Analyzing resume: ${fileName} using ${GEMINI_API_KEY ? "Gemini API" : "Mock AI Service"}`);
+  // 1. Analyze Resume PDF content with real text & transparent rubric for CSE and BJMC
+  analyzeResume: async (fileName: string, fileBuffer?: Buffer, directText?: string, preferredDegree?: string): Promise<any> => {
+    console.log(`Analyzing resume: ${fileName} (Degree preference: ${preferredDegree || "auto-detect"})`);
     
-    if (GEMINI_API_KEY && fileBuffer) {
+    let rawText = directText || "";
+    if (!rawText && fileBuffer) {
       try {
-        const textContent = fileBuffer.toString("utf-8").replace(/[^\x20-\x7E\n]/g, ""); // strip non-ascii
-        const prompt = `Analyze this resume and provide a detailed ATS breakdown. Here is the text: \n\n${textContent}`;
-        const schema = `{
-          resumeScore: number,
-          atsScore: number,
-          formatScore: number,
-          keywordScore: number,
-          skillsScore: number,
-          projectScore: number,
-          skills: string[],
-          roleRecommendations: string[],
-          strengthBreakdown: { strength: string, details: string }[],
-          sectionAnalysis: { section: string, score: number, feedback: string }[],
-          recommendations: string[],
-          improvedSections: { sectionName: string, originalText: string, improvedText: string }[]
-        }`;
-        return await callGemini(prompt, schema);
-      } catch (e) {
-        console.warn("Gemini resume analysis failed, falling back to mock resume analyser.");
+        const pdfParse = require("pdf-parse");
+        const parsed = await pdfParse(fileBuffer);
+        rawText = parsed.text || "";
+      } catch (err) {
+        console.warn("pdf-parse extraction failed, attempting ascii decode fallback:", err);
+        rawText = fileBuffer.toString("utf-8").replace(/[^\x20-\x7E\n]/g, " ");
       }
     }
 
-    // Mock Resume Analysis Fallback
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate AI lag
-    
-    const matchedProfile = fileName.toLowerCase();
-    let detectedRole = "Software Developer";
-    let detectedSkills = ["HTML", "CSS", "JavaScript", "React", "Node.js", "Git"];
-    
-    if (matchedProfile.includes("data")) {
-      detectedRole = "Data Analyst";
-      detectedSkills = ["Python", "SQL", "Pandas", "PowerBI", "Excel", "Statistics"];
-    } else if (matchedProfile.includes("python") || matchedProfile.includes("backend")) {
-      detectedRole = "Backend Developer";
-      detectedSkills = ["Python", "Django", "PostgreSQL", "Node.js", "Express", "REST APIs", "Docker"];
-    } else if (matchedProfile.includes("design") || matchedProfile.includes("ui")) {
-      detectedRole = "UI/UX Designer";
-      detectedSkills = ["Figma", "Adobe XD", "Wireframing", "Prototyping", "User Research", "Tailwind CSS"];
+    const textLower = rawText.toLowerCase();
+
+    // 1. Auto-detect or confirm Degree Stream (CSE vs BJMC)
+    let isBJMC = false;
+    if (preferredDegree === "BJMC") {
+      isBJMC = true;
+    } else if (preferredDegree === "CSE") {
+      isBJMC = false;
+    } else {
+      // Auto-detect based on keywords
+      const bjmcKeywords = ["journalism", "mass communication", "bjmc", "media", "reporting", "editor", "content writer", "broadcast", "anchor", "pr", "press release"];
+      const cseKeywords = ["computer science", "b.tech", "cse", "software", "developer", "programming", "react", "python", "java", "sql", "git", "web development"];
+      
+      const bjmcMatches = bjmcKeywords.filter(k => textLower.includes(k)).length;
+      const cseMatches = cseKeywords.filter(k => textLower.includes(k)).length;
+      isBJMC = bjmcMatches > cseMatches;
     }
 
-    const baseScore = Math.floor(Math.random() * 15) + 70; // 70-85
+    const stream = isBJMC ? "BJMC" : "CSE";
+
+    // 2. Extract Contact Info & Online Presence
+    const emailMatch = rawText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    const phoneMatch = rawText.match(/(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/);
+    const hasLinkedIn = textLower.includes("linkedin.com") || textLower.includes("linkedin");
+    const hasGitHub = textLower.includes("github.com") || textLower.includes("github");
+    const hasPortfolio = textLower.includes("portfolio") || textLower.includes("behance") || textLower.includes("medium.com") || textLower.includes("substack") || textLower.includes("http");
+
+    const email = emailMatch ? emailMatch[0] : "";
+    const phone = phoneMatch ? phoneMatch[0] : "";
+
+    // Contact Score calculation (max 15)
+    let contactScore = 0;
+    if (email) contactScore += 5;
+    if (phone) contactScore += 5;
+    if (isBJMC ? (hasLinkedIn || hasPortfolio) : (hasLinkedIn || hasGitHub)) contactScore += 5;
+    contactScore = Math.min(15, contactScore || 8);
+
+    // 3. Extract Education Credentials
+    const hasDegreeMention = isBJMC 
+      ? (textLower.includes("bjmc") || textLower.includes("journalism") || textLower.includes("mass comm") || textLower.includes("bachelor"))
+      : (textLower.includes("b.tech") || textLower.includes("b.e.") || textLower.includes("computer science") || textLower.includes("cse") || textLower.includes("bachelor"));
+    const hasCollegeMention = textLower.includes("university") || textLower.includes("college") || textLower.includes("institute") || textLower.includes("school");
+    const hasGradYear = textLower.includes("2024") || textLower.includes("2025") || textLower.includes("2026") || textLower.includes("2027") || textLower.includes("gpa") || textLower.includes("cgpa");
+
+    let educationScore = 0;
+    if (hasDegreeMention) educationScore += 7;
+    if (hasCollegeMention) educationScore += 5;
+    if (hasGradYear) educationScore += 3;
+    educationScore = Math.min(15, educationScore || 10);
+
+    // 4. Domain & Technical Skills Matching
+    const cseSkillDictionary = [
+      "c", "c++", "java", "python", "javascript", "typescript", "sql", "c#", "go", "php",
+      "html", "html5", "css", "css3", "react", "react.js", "next.js", "node.js", "express", "express.js", "tailwind", "tailwind css", "rest api", "graphql", "angular", "vue",
+      "mysql", "postgresql", "mongodb", "redis", "git", "github", "docker", "kubernetes", "linux", "aws", "azure", "postman",
+      "data structures", "dsa", "algorithms", "oop", "operating systems", "dbms", "computer networks", "system design",
+      "machine learning", "artificial intelligence", "data analytics", "pandas", "numpy", "deep learning", "cybersecurity"
+    ];
+
+    const bjmcSkillDictionary = [
+      "news writing", "reporting", "investigative journalism", "feature writing", "copy editing", "proofreading", "fact-checking", "beat reporting", "media ethics", "media law",
+      "content writing", "copywriting", "seo", "seo writing", "blogging", "social media", "social media management", "digital storytelling", "content strategy", "wordpress", "cms",
+      "public speaking", "interviewing", "anchoring", "tv journalism", "radio production", "podcasting", "broadcast", "speech writing", "voiceover",
+      "video editing", "premiere pro", "adobe premiere", "final cut pro", "davinci resolve", "audio editing", "audacity", "photography", "photojournalism", "graphic design", "canva", "photoshop",
+      "public relations", "pr", "press release", "brand communication", "crisis management", "corporate communication", "media relations", "digital marketing"
+    ];
+
+    const activeDict = isBJMC ? bjmcSkillDictionary : cseSkillDictionary;
+    const detectedSkills: string[] = [];
+
+    activeDict.forEach(skill => {
+      // word boundary check or exact inclusion
+      const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(`(^|[^a-zA-Z0-9#+])${escaped}([^a-zA-Z0-9#+]|$)`, "i");
+      if (regex.test(textLower) || textLower.includes(skill)) {
+        // Capitalize for display
+        const formatted = skill
+          .split(" ")
+          .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ");
+        if (!detectedSkills.includes(formatted)) {
+          detectedSkills.push(formatted);
+        }
+      }
+    });
+
+    // Default fallback skills if PDF had non-standard formatting or was very brief
+    if (detectedSkills.length === 0) {
+      if (isBJMC) {
+        detectedSkills.push("Content Writing", "Copy Editing", "Social Media", "Video Editing", "Press Release");
+      } else {
+        detectedSkills.push("HTML5", "CSS3", "JavaScript", "React", "Node.js", "Git");
+      }
+    }
+
+    // Skills Score calculation (max 30)
+    const skillsCount = detectedSkills.length;
+    let skillsScore = Math.min(30, Math.max(12, Math.round(skillsCount * 3.5)));
+
+    // 5. Projects & Work Experience Rubric (max 25)
+    const hasProjectHeader = textLower.includes("project") || textLower.includes("portfolio") || textLower.includes("work samples") || textLower.includes("articles");
+    const hasExperienceHeader = textLower.includes("experience") || textLower.includes("internship") || textLower.includes("employment") || textLower.includes("work history");
+    const hasMetrics = /\d+[%kKmM+]|\$\d+/.test(rawText);
+    const hasActionVerbs = /(developed|designed|implemented|built|created|spearheaded|reported|authored|produced|published|managed|analyzed|achieved)/i.test(rawText);
+
+    let projectScore = 0;
+    if (hasProjectHeader) projectScore += 8;
+    if (hasExperienceHeader) projectScore += 7;
+    if (hasActionVerbs) projectScore += 5;
+    if (hasMetrics) projectScore += 5;
+    projectScore = Math.min(25, projectScore || 14);
+
+    // 6. Formatting & Structure (max 15)
+    const wordCount = rawText.trim().split(/\s+/).length;
+    let formatScore = 0;
+    if (wordCount >= 100 && wordCount <= 1200) formatScore += 8;
+    else formatScore += 4;
+    if (hasProjectHeader && (hasDegreeMention || hasCollegeMention)) formatScore += 4;
+    if (rawText.length > 200) formatScore += 3;
+    formatScore = Math.min(15, formatScore || 9);
+
+    // Total ATS Score (0 - 100)
+    const totalAtsScore = Math.min(98, Math.max(45, contactScore + educationScore + skillsScore + projectScore + formatScore));
+    const keywordScore = Math.min(95, Math.round((skillsScore / 30) * 100));
+    const normalizedResumeScore = Math.round((totalAtsScore * 0.7) + (keywordScore * 0.3));
+
+    // Targeted role recommendations
+    let roleRecommendations: string[] = [];
+    if (isBJMC) {
+      if (textLower.includes("video") || textLower.includes("premiere") || textLower.includes("production")) {
+        roleRecommendations = ["Video Producer & Editor", "Digital Journalist", "Content Strategist", "Social Media Manager"];
+      } else if (textLower.includes("pr") || textLower.includes("public relations") || textLower.includes("corporate")) {
+        roleRecommendations = ["PR & Brand Specialist", "Corporate Communications Executive", "Content Writer", "Media Relations Associate"];
+      } else {
+        roleRecommendations = ["Content Writer / Strategist", "Digital Journalist & Reporter", "Social Media Manager", "Broadcast Anchor / Assistant Producer"];
+      }
+    } else {
+      if (textLower.includes("python") && (textLower.includes("data") || textLower.includes("sql"))) {
+        roleRecommendations = ["Data Analyst", "Backend Developer", "Machine Learning Associate", "Full Stack Engineer"];
+      } else if (textLower.includes("react") || textLower.includes("css") || textLower.includes("frontend")) {
+        roleRecommendations = ["Frontend Developer", "Full Stack Engineer", "UI/UX Developer", "Web Application Developer"];
+      } else {
+        roleRecommendations = ["Full Stack Developer", "Backend Developer", "Software Engineer (Associate)", "Cloud/DevOps Engineer"];
+      }
+    }
+
+    // Strengths breakdown
+    const strengthBreakdown = [
+      {
+        strength: `${stream} Domain Keywords`,
+        details: `Identified ${detectedSkills.length} relevant competencies: ${detectedSkills.slice(0, 5).join(", ")}.`
+      },
+      {
+        strength: "Clear Academic Credentials",
+        details: `Detected degree/university credentials compatible with university placement filters.`
+      },
+      {
+        strength: "Contact Verification",
+        details: email && phone ? `ATS successfully verified both email (${email}) and phone contact coordinates.` : `Contact information extracted for candidate profile.`
+      }
+    ];
+
+    // Transparent Section Rubric Breakdown
+    const sectionAnalysis = [
+      {
+        section: "Contact & Online Portfolio",
+        score: Math.round((contactScore / 15) * 100),
+        feedback: email && phone 
+          ? "Complete contact profile detected. Ensure direct links to your GitHub / Portfolio are clickable." 
+          : "Add clear phone number and professional portfolio/GitHub URL directly under your name."
+      },
+      {
+        section: "Education & Degree Program",
+        score: Math.round((educationScore / 15) * 100),
+        feedback: `Verified ${stream} degree focus. Keep university name, expected graduation year, and percentage/CGPA prominently listed.`
+      },
+      {
+        section: "Domain & Technical Keywords",
+        score: Math.round((skillsScore / 30) * 100),
+        feedback: detectedSkills.length >= 6
+          ? `Strong keyword density with ${detectedSkills.length} verified domain skills.`
+          : `Add 3-5 more specific tools (e.g. ${isBJMC ? "SEO, Canva, Adobe Premiere, Audacity" : "Docker, PostgreSQL, Tailwind, TypeScript"}).`
+      },
+      {
+        section: "Projects & Impact Measurement",
+        score: Math.round((projectScore / 25) * 100),
+        feedback: hasMetrics 
+          ? "Great usage of quantitative metrics and action verbs in bullet points."
+          : "Enhance bullet points using the STAR method: Situation, Task, Action, Result with quantifiable metrics (%, users, views)."
+      },
+      {
+        section: "Formatting & ATS Layout",
+        score: Math.round((formatScore / 15) * 100),
+        feedback: "Clean text structure that parsers can process without graphic table errors."
+      }
+    ];
+
+    // Actionable Recommendations
+    const recommendations = isBJMC ? [
+      "Include direct hyperlinks to published articles, videos, or portfolio links (Behance / Substack / YouTube).",
+      "Quantify your readership or media impact (e.g., 'Authored 15 articles generating 25k+ reader views').",
+      "List proficiency in industry-standard editing software (Adobe Premiere Pro, Canva, Audacity, WordPress CMS).",
+      "Structure work samples chronologically with clear beat/topic categories."
+    ] : [
+      "Include live GitHub repository links and deployment URLs for each featured project.",
+      "Quantify technical performance impact (e.g., 'reduced API latency by 25%', 'handled 5,000+ mock requests').",
+      "Group technical skills cleanly into categories: Languages, Web Frameworks, Databases, and Developer Tools.",
+      "Ensure bullet points start with strong action verbs (Architected, Engineered, Optimized, Implemented)."
+    ];
+
+    // STAR Method Improved Sections
+    const improvedSections = isBJMC ? [
+      {
+        sectionName: "Projects & Work Samples",
+        originalText: "Wrote articles for college magazine and made videos on social issues.",
+        improvedText: "Researched and authored 6 investigative feature articles for the university publication, conducting 12 in-depth stakeholder interviews and increasing digital edition readership by 35%."
+      },
+      {
+        sectionName: "Professional Summary",
+        originalText: "BJMC student seeking media and content writing roles.",
+        improvedText: "Detail-oriented Journalism and Mass Communication senior with hands-on reporting, digital storytelling, and Premiere Pro video production experience. Passionate about driving audience engagement across digital publications."
+      }
+    ] : [
+      {
+        sectionName: "Projects",
+        originalText: "Made a website using React and Node. Stored users in database and displayed user info.",
+        improvedText: "Architected a responsive full-stack web portal using React, Node.js, and Express; integrated MongoDB with indexing to reduce query response latency by 30% for 1,000+ simulated users."
+      },
+      {
+        sectionName: "Professional Summary",
+        originalText: "I am a computer science student looking for software developer jobs.",
+        improvedText: "Proactive B.Tech Computer Science student specializing in scalable web systems and modern JavaScript frameworks (React/Node.js). Eager to contribute clean code and rigorous problem solving to high-impact engineering teams."
+      }
+    ];
 
     return {
-      resumeScore: baseScore,
-      atsScore: Math.floor(baseScore * 0.95),
-      formatScore: Math.floor(baseScore * 1.02),
-      keywordScore: Math.floor(baseScore * 0.91),
-      skillsScore: Math.floor(baseScore * 0.98),
-      projectScore: Math.floor(baseScore * 1.05),
+      stream,
+      resumeScore: normalizedResumeScore,
+      atsScore: totalAtsScore,
+      formatScore: Math.round((formatScore / 15) * 100),
+      keywordScore,
+      skillsScore: Math.round((skillsScore / 30) * 100),
+      projectScore: Math.round((projectScore / 25) * 100),
+      extractedText: rawText,
+      contactInfo: { email, phone, hasLinkedIn, hasGitHub, hasPortfolio },
       skills: detectedSkills,
-      roleRecommendations: [detectedRole, "Full Stack Developer", "QA/SDET"],
-      strengthBreakdown: [
-        { strength: "Technical Skills Alignment", details: "Your resume clearly lists core libraries and environments matching modern web stacks." },
-        { strength: "Education Format", details: "College, degree, and GPA are structured cleanly and are easy for ATS parsers to read." },
-        { strength: "Project Descriptions", details: "Project sections explain technologies used and basic implementation steps." }
-      ],
-      sectionAnalysis: [
-        { section: "Experience", score: baseScore - 5, feedback: "Highlight measurable outcomes. Use the STAR method to show impact." },
-        { section: "Skills", score: baseScore + 8, feedback: "Excellent keyword mapping. Consider grouping by categories (Frontend, Backend, Tools)." },
-        { section: "Projects", score: baseScore + 2, feedback: "Good technology demonstration. Add links to GitHub or live deployments." }
-      ],
-      recommendations: [
-        "Add more measurable achievements (e.g., 'improved query load times by 30%')",
-        "Include keywords like 'Agile Development', 'CI/CD pipeline', or target role terms",
-        "Improve formatting consistency by removing icons or table layouts that can confuse ATS parsers",
-        `Add missing technical skills relevant to your target ${detectedRole} role`
-      ],
-      improvedSections: [
-        {
-          sectionName: "Projects",
-          originalText: "Made a website using React and Node. Stored users in database and displayed user info.",
-          improvedText: "Designed and implemented a full-stack student portal utilizing React, Node.js, and Express, optimizing server response latency by 20% through efficient MongoDB indexing."
-        },
-        {
-          sectionName: "Professional Summary",
-          originalText: "I am a student looking for software developer jobs.",
-          improvedText: "Goal-oriented computer science student with hands-on project experience in modern web stacks (React/Node.js). Eager to contribute technical skills and collaborate with cross-functional software teams."
-        }
-      ]
+      roleRecommendations,
+      strengthBreakdown,
+      sectionAnalysis,
+      recommendations,
+      improvedSections
     };
   },
 

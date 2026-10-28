@@ -12,6 +12,9 @@ export interface IProfile extends Document {
   avatarUrl?: string;
   bio?: string;
   resumeUrl?: string;
+  resumeFileName?: string;
+  extractedResumeText?: string;
+  rubricBreakdown?: any;
   resumeScore?: number;
   atsScore?: number;
   formatScore?: number;
@@ -21,6 +24,7 @@ export interface IProfile extends Document {
   interviewScore?: number;
   communicationScore?: number;
   skillsCompleted?: number;
+  completedSkillsList?: string[];
   mockInterviewsCompleted?: number;
   communityContributions?: number;
   projects: IProject[];
@@ -42,6 +46,9 @@ const ProfileSchema: Schema = new Schema(
     avatarUrl: { type: String, default: "" },
     bio: { type: String, default: "" },
     resumeUrl: { type: String, default: "" },
+    resumeFileName: { type: String, default: "" },
+    extractedResumeText: { type: String, default: "" },
+    rubricBreakdown: { type: Schema.Types.Mixed, default: null },
     resumeScore: { type: Number, default: 0 },
     atsScore: { type: Number, default: 0 },
     formatScore: { type: Number, default: 0 },
@@ -51,6 +58,7 @@ const ProfileSchema: Schema = new Schema(
     interviewScore: { type: Number, default: 0 },
     communicationScore: { type: Number, default: 0 },
     skillsCompleted: { type: Number, default: 0 },
+    completedSkillsList: { type: [String], default: [] },
     mockInterviewsCompleted: { type: Number, default: 0 },
     communityContributions: { type: Number, default: 0 },
     projects: { type: [ProjectSchema], default: [] },

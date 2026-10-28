@@ -4,11 +4,6 @@ import { api } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
   ResponsiveContainer, 
-  RadarChart, 
-  PolarGrid, 
-  PolarAngleAxis, 
-  PolarRadiusAxis, 
-  Radar, 
   BarChart, 
   Bar, 
   XAxis, 
@@ -20,40 +15,46 @@ import {
   Briefcase, 
   Award, 
   TrendingUp, 
-  Users, 
   FileText, 
-  MessageSquare, 
   CheckCircle2, 
   Sparkles, 
   ArrowRight, 
-  Calendar, 
   BookOpen, 
-  BrainCircuit, 
-  ChevronRight,
-  Building2,
-  CheckSquare,
   GraduationCap,
-  FolderArchive,
-  Send,
-  ExternalLink
+  Code2,
+  Newspaper,
+  Compass,
+  Swords,
+  Mic,
+  Globe,
+  Check,
+  AlertCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [dbData, setDbData] = useState<any>(null);
+  const [applicationsCount, setApplicationsCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+
+  const degree = user?.degree === "BJMC" ? "BJMC" : "CSE";
+  const isBJMC = degree === "BJMC";
 
   useEffect(() => {
     const fetchDb = async () => {
       try {
-        const data = await api.profile.getDashboard();
-        setDbData(data);
+        const [dashData, appsData] = await Promise.all([
+          api.profile.getDashboard(),
+          api.applications.get().catch(() => [])
+        ]);
+        setDbData(dashData);
+        setApplicationsCount(Array.isArray(appsData) ? appsData.length : 0);
       } catch (e) {
         console.error("Dashboard data error:", e);
       } finally {
@@ -65,376 +66,382 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[70vh]">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-2">
-          <BrainCircuit className="h-10 w-10 animate-pulse text-primary mx-auto" />
-          <p className="text-sm text-muted-foreground animate-pulse">Assembling career metrics...</p>
+          <GraduationCap className="h-8 w-8 animate-pulse text-primary mx-auto" />
+          <p className="text-xs text-muted-foreground animate-pulse">Loading placement metrics...</p>
         </div>
       </div>
     );
   }
 
   const {
-    careerGoal = "Set your career goal",
-    readinessScore = 35,
-    resumeScore = 0,
-    atsScore = 0,
-    interviewScore = 0,
-    communicationScore = 0,
-    skillsCompleted = 0,
-    mockInterviewsCompleted = 0,
-    communityContributions = 0,
-    suggestions = [],
-    upcomingSessions = [],
-    recentPosts = []
+    careerGoal = user?.careerGoal || (isBJMC ? "Digital Journalist / Reporter" : "Full Stack Developer"),
+    readinessScore = 40,
+    resumeScore = profile?.resumeScore || 0,
+    atsScore = profile?.atsScore || 0,
+    interviewScore = profile?.interviewScore || 0,
+    communicationScore = profile?.communicationScore || 0,
+    skillsCompleted = profile?.skillsCompleted || 0,
+    suggestions = []
   } = dbData || {};
 
-  const scoreBreakdown = [
-    { metric: "Resume Scan", score: resumeScore || 20 },
-    { metric: "ATS Audit", score: atsScore || 20 },
-    { metric: "Interview Prep", score: interviewScore || 20 },
-    { metric: "Communication", score: communicationScore || 20 },
-    { metric: "Roadmap Skills", score: Math.min(100, skillsCompleted * 10) },
-    { metric: "Mock Complete", score: Math.min(100, mockInterviewsCompleted * 20) },
+  const userSkillsCount = user?.skills?.length || 0;
+  const hasResume = !!profile?.resumeUrl;
+
+  const scoreChartData = [
+    { metric: "Resume ATS", score: atsScore || 20, fill: "hsl(var(--primary))" },
+    { metric: "Domain Skills", score: Math.min(100, userSkillsCount * 10), fill: "hsl(var(--chart-2))" },
+    { metric: "Interview Prep", score: interviewScore || 20, fill: "hsl(var(--chart-3))" },
+    { metric: "Communication", score: communicationScore || 20, fill: "hsl(var(--chart-4))" },
+    { metric: "Roadmap Milestones", score: Math.min(100, skillsCompleted * 15), fill: "hsl(var(--chart-5))" },
   ];
+
+  // Benchmark recommendation previews
+  const csePreviews = [
+    { title: "Full Stack Developer", match: Math.min(95, Math.max(50, userSkillsCount * 9)), ctc: "10 - 20 LPA", skills: ["React", "Node.js", "SQL"] },
+    { title: "Frontend Developer", match: Math.min(95, Math.max(45, userSkillsCount * 11)), ctc: "8 - 16 LPA", skills: ["JavaScript", "React", "HTML5"] },
+    { title: "Data Analyst", match: Math.min(95, Math.max(40, userSkillsCount * 8)), ctc: "7 - 14 LPA", skills: ["Python", "SQL", "Pandas"] }
+  ];
+
+  const bjmcPreviews = [
+    { title: "Digital Journalist / Reporter", match: Math.min(95, Math.max(50, userSkillsCount * 10)), ctc: "5 - 11 LPA", skills: ["News Writing", "Reporting", "Copy Editing"] },
+    { title: "Content Writer & Strategist", match: Math.min(95, Math.max(55, userSkillsCount * 11)), ctc: "6 - 13 LPA", skills: ["Content Writing", "SEO", "Storytelling"] },
+    { title: "PR & Brand Specialist", match: Math.min(95, Math.max(45, userSkillsCount * 9)), ctc: "7 - 15 LPA", skills: ["Public Relations", "Press Releases", "Media"] }
+  ];
+
+  const activePreviews = isBJMC ? bjmcPreviews : csePreviews;
 
   return (
     <div className="space-y-6">
-      {/* Header section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight gradient-text">
-            Welcome back, {user?.name}!
+      {/* Student Welcome Header Banner */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl border border-border bg-card shadow-sm">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge className="bg-primary/10 text-primary border-primary/20 text-xs font-semibold">
+              {isBJMC ? <Newspaper className="h-3 w-3 mr-1 inline" /> : <Code2 className="h-3 w-3 mr-1 inline" />}
+              {isBJMC ? "BJMC • Journalism & Mass Comm" : "CSE • Computer Science & Eng"}
+            </Badge>
+            <Badge variant="outline" className="text-xs font-mono">
+              Academic Year {user?.academicYear || 4}
+            </Badge>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Welcome back, {user?.name || "Student"}!
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Student profile active at <span className="font-semibold text-foreground">{user?.college}</span>
+          <p className="text-xs text-muted-foreground">
+            Student profile active at <span className="font-semibold text-foreground">{user?.college}</span> • Target Career: <span className="font-bold text-primary">{careerGoal}</span>
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button size="sm" onClick={() => navigate("/resume")} className="glow-primary gap-1">
-            <FileText className="h-4 w-4" /> Scan Resume
+
+        <div className="flex items-center gap-2 shrink-0">
+          <Button size="sm" onClick={() => navigate("/resume")} className="text-xs h-8 font-semibold gap-1.5 shadow-sm">
+            <FileText className="h-3.5 w-3.5" /> Scan Resume
           </Button>
-          <Button size="sm" variant="outline" onClick={() => navigate("/chat")} className="gap-1">
-            <Sparkles className="h-4 w-4" /> Ask Career AI
+          <Button size="sm" variant="outline" onClick={() => navigate("/recommendations")} className="text-xs h-8 font-semibold gap-1.5">
+            <Sparkles className="h-3.5 w-3.5" /> Career Matches
           </Button>
         </div>
       </div>
 
-      {/* Hero Stats Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Career Readiness Score Circular Widget */}
-        <Card className="glass-card overflow-hidden border-primary/20 relative col-span-1 lg:col-span-2">
-          <div className="absolute top-0 right-0 h-40 w-40 rounded-full bg-primary/5 filter blur-2xl pointer-events-none" />
-          <CardContent className="p-6 h-full flex flex-col md:flex-row items-center gap-8">
-            <div className="flex flex-col items-center justify-center shrink-0">
-              <div className="relative h-32 w-32 flex items-center justify-center">
-                <svg className="absolute inset-0 transform -rotate-95 w-full h-full">
-                  <circle cx="64" cy="64" r="50" className="stroke-muted" strokeWidth="10" fill="transparent" />
-                  <circle cx="64" cy="64" r="50" className="stroke-primary transition-all duration-1000" strokeWidth="10" fill="transparent"
-                    strokeDasharray={2 * Math.PI * 50} strokeDashoffset={2 * Math.PI * 50 * (1 - readinessScore / 100)} strokeLinecap="round" />
-                </svg>
-                <div className="text-center">
-                  <p className="text-3xl font-black">{readinessScore}%</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Ready</p>
-                </div>
-              </div>
+      {/* 4 Core Metric Widgets */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Metric 1: Career Readiness Score */}
+        <Card className="border border-border bg-card shadow-sm rounded-2xl">
+          <CardContent className="p-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Career Readiness</p>
+              <p className="text-2xl font-black text-foreground mt-1">{readinessScore}%</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Composite Placement Gauge</p>
             </div>
-            
-            <div className="flex-1 space-y-3">
-              <Badge variant="secondary" className="gap-1 text-xs">
-                <TrendingUp className="h-3.5 w-3.5" /> target: {careerGoal}
-              </Badge>
-              <h2 className="text-lg font-bold text-foreground">Your Career Readiness</h2>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Calculated from resume parameters, technical skill roadmaps, completed practice mock panels, and communication test marks.
-              </p>
-              <div className="border-t border-border/40 pt-3">
-                <p className="text-xs font-semibold text-accent flex items-center gap-1.5 mb-1.5">
-                  <Sparkles className="h-3.5 w-3.5" /> Next Improvement Action:
-                </p>
-                <p className="text-xs text-foreground font-medium bg-accent/5 p-2 rounded border border-accent/10">
-                  {suggestions[0] || "Review roadmap chapters to unlock new coding project ideas."}
-                </p>
-              </div>
+            <div className="relative h-14 w-14 flex items-center justify-center shrink-0">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="28" cy="28" r="22" className="stroke-muted" strokeWidth="4" fill="transparent" />
+                <circle 
+                  cx="28" 
+                  cy="28" 
+                  r="22" 
+                  className="stroke-primary transition-all duration-700" 
+                  strokeWidth="4" 
+                  fill="transparent"
+                  strokeDasharray={2 * Math.PI * 22} 
+                  strokeDashoffset={2 * Math.PI * 22 * (1 - readinessScore / 100)} 
+                  strokeLinecap="round" 
+                />
+              </svg>
+              <TrendingUp className="h-4 w-4 text-primary absolute" />
             </div>
           </CardContent>
         </Card>
 
-        {/* Quick summary stats */}
-        <Card className="glass-card">
-          <CardHeader><CardTitle className="text-sm font-bold flex items-center gap-1.5"><Award className="h-4 w-4 text-accent" /> Score breakdown</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
+        {/* Metric 2: Resume ATS Score */}
+        <Card 
+          onClick={() => navigate("/resume")}
+          className="border border-border bg-card shadow-sm rounded-2xl cursor-pointer hover:border-primary/50 transition-all"
+        >
+          <CardContent className="p-4 flex items-center justify-between gap-3">
             <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span>ATS Resume Audit</span>
-                <span className="font-semibold">{atsScore}%</span>
-              </div>
-              <Progress value={atsScore} className="h-1.5 bg-muted" />
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Resume ATS Score</p>
+              <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+                {atsScore > 0 ? `${atsScore}/100` : "Needs Scan"}
+              </p>
+              <p className="text-[11px] text-primary hover:underline font-semibold mt-0.5 flex items-center gap-0.5">
+                {hasResume ? "View ATS Rubric" : "Upload Resume PDF"} <ArrowRight className="h-3 w-3" />
+              </p>
             </div>
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span>Speaking Communication</span>
-                <span className="font-semibold">{communicationScore}%</span>
-              </div>
-              <Progress value={communicationScore} className="h-1.5 bg-muted" />
+            <div className="h-11 w-11 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+              <FileText className="h-5 w-5" />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Metric 3: Skills Count */}
+        <Card 
+          onClick={() => navigate("/profile")}
+          className="border border-border bg-card shadow-sm rounded-2xl cursor-pointer hover:border-primary/50 transition-all"
+        >
+          <CardContent className="p-4 flex items-center justify-between gap-3">
             <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span>Mock Interview Avg</span>
-                <span className="font-semibold">{interviewScore}%</span>
-              </div>
-              <Progress value={interviewScore} className="h-1.5 bg-muted" />
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Verified Skills</p>
+              <p className="text-2xl font-black text-foreground mt-1">{userSkillsCount}</p>
+              <p className="text-[11px] text-primary hover:underline font-semibold mt-0.5 flex items-center gap-0.5">
+                Manage Competencies <ArrowRight className="h-3 w-3" />
+              </p>
+            </div>
+            <div className="h-11 w-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <Award className="h-5 w-5" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Metric 4: Active Applications */}
+        <Card 
+          onClick={() => navigate("/applications")}
+          className="border border-border bg-card shadow-sm rounded-2xl cursor-pointer hover:border-primary/50 transition-all"
+        >
+          <CardContent className="p-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Job Pipeline</p>
+              <p className="text-2xl font-black text-foreground mt-1">{applicationsCount}</p>
+              <p className="text-[11px] text-primary hover:underline font-semibold mt-0.5 flex items-center gap-0.5">
+                View Tracker <ArrowRight className="h-3 w-3" />
+              </p>
+            </div>
+            <div className="h-11 w-11 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
+              <Briefcase className="h-5 w-5" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Campus Placement & Career Readiness Hub */}
+      {/* Onboarding Checklist for Students */}
+      {(!hasResume || userSkillsCount < 4 || readinessScore < 50) && (
+        <Card className="border border-primary/30 bg-primary/[0.02] shadow-sm rounded-2xl">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-bold flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" /> Placement Cell Onboarding Checklist
+            </CardTitle>
+            <CardDescription className="text-xs text-muted-foreground">
+              Complete these steps to optimize your profile for on-campus drives.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-1">
+            <div className="p-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 text-xs flex items-center gap-2">
+              <Check className="h-4 w-4 text-emerald-600 shrink-0" />
+              <div>
+                <p className="font-semibold text-foreground">1. Stream Chosen</p>
+                <p className="text-[10px] text-muted-foreground">{degree} Stream Active</p>
+              </div>
+            </div>
+
+            <div 
+              onClick={() => navigate("/resume")}
+              className={`p-3 rounded-xl border text-xs flex items-center gap-2 cursor-pointer transition-colors ${
+                hasResume ? "border-emerald-200 bg-emerald-50/50 text-foreground" : "border-border hover:bg-muted/40"
+              }`}
+            >
+              {hasResume ? <Check className="h-4 w-4 text-emerald-600 shrink-0" /> : <AlertCircle className="h-4 w-4 text-amber-500 shrink-0" />}
+              <div>
+                <p className="font-semibold text-foreground">2. Upload Resume</p>
+                <p className="text-[10px] text-muted-foreground">{hasResume ? "ATS Scored" : "PDF Scan Required"}</p>
+              </div>
+            </div>
+
+            <div 
+              onClick={() => navigate("/recommendations")}
+              className="p-3 rounded-xl border border-border hover:bg-muted/40 text-xs flex items-center gap-2 cursor-pointer transition-colors"
+            >
+              <Compass className="h-4 w-4 text-primary shrink-0" />
+              <div>
+                <p className="font-semibold text-foreground">3. Check Matches</p>
+                <p className="text-[10px] text-muted-foreground">Skill-Gap Engine</p>
+              </div>
+            </div>
+
+            <div 
+              onClick={() => navigate("/roadmap")}
+              className="p-3 rounded-xl border border-border hover:bg-muted/40 text-xs flex items-center gap-2 cursor-pointer transition-colors"
+            >
+              <BookOpen className="h-4 w-4 text-primary shrink-0" />
+              <div>
+                <p className="font-semibold text-foreground">4. Start Roadmap</p>
+                <p className="text-[10px] text-muted-foreground">Technical Milestones</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Top Recommendations & Career Matches */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-primary" /> Campus Placement Command Center
+            <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" /> Top Career Recommendations for Your Stream
             </h2>
             <p className="text-xs text-muted-foreground">
-              Everything you need for upcoming on-campus drives, off-campus referrals, and technical rounds.
+              Calculated from your {userSkillsCount} verified skills and {degree} degree requirements.
             </p>
           </div>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={() => navigate("/recommendations")}
+            className="text-xs text-primary font-semibold gap-1 h-7"
+          >
+            View All Roles <ArrowRight className="h-3 w-3" />
+          </Button>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {activePreviews.map((role) => (
+            <Card 
+              key={role.title}
+              onClick={() => navigate(`/roadmap?goal=${encodeURIComponent(role.title)}`)}
+              className="border border-border bg-card shadow-sm rounded-2xl cursor-pointer hover:border-primary/50 transition-all p-4 space-y-3 flex flex-col justify-between"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="text-[10px] font-mono">
+                    {degree}
+                  </Badge>
+                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                    {role.match}% Match
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-foreground">{role.title}</h3>
+                <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                  CTC: <span className="text-foreground font-bold">{role.ctc}</span>
+                </p>
+                <div className="flex flex-wrap gap-1 pt-1">
+                  {role.skills.map(s => (
+                    <span key={s} className="px-1.5 py-0.5 text-[10px] rounded bg-muted text-muted-foreground font-medium">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-border flex items-center justify-between text-xs text-primary font-semibold">
+                <span>View Roadmap</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Placement Preparation Modules Grid */}
+      <div className="space-y-3">
+        <h2 className="text-base font-bold text-foreground">Career Growth & Placement Prep Modules</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Company Archives */}
+          {/* Module 1: Resume Studio */}
           <Card 
-            onClick={() => navigate("/companies")}
-            className="group cursor-pointer hover:border-primary/50 transition-all hover:shadow-md border-border/60 bg-card/60 hover:-translate-y-0.5"
+            onClick={() => navigate("/resume")}
+            className="border border-border bg-card shadow-sm rounded-2xl cursor-pointer hover:border-primary/50 transition-all p-4 space-y-2"
           >
-            <CardContent className="p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600">
-                  <Building2 className="h-5 w-5" />
-                </div>
-                <Badge variant="outline" className="text-[10px] text-muted-foreground group-hover:text-primary">
-                  Explore
-                </Badge>
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">Company Blueprints</h3>
-                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                  Hiring patterns, CGPA cutoffs, and real interview rounds for Google, Amazon, Deloitte & more.
-                </p>
-              </div>
-            </CardContent>
+            <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <FileText className="h-4.5 w-4.5" />
+            </div>
+            <h3 className="text-xs font-bold text-foreground">Resume Studio & ATS</h3>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Upload CV, test against university placement filters, and get STAR rewrites.
+            </p>
           </Card>
 
-          {/* Card 2: Application Tracker */}
+          {/* Module 2: Career Roadmaps */}
           <Card 
-            onClick={() => navigate("/applications")}
-            className="group cursor-pointer hover:border-emerald-500/50 transition-all hover:shadow-md border-border/60 bg-card/60 hover:-translate-y-0.5"
+            onClick={() => navigate("/roadmap")}
+            className="border border-border bg-card shadow-sm rounded-2xl cursor-pointer hover:border-emerald-500/50 transition-all p-4 space-y-2"
           >
-            <CardContent className="p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600">
-                  <CheckSquare className="h-5 w-5" />
-                </div>
-                <Badge variant="outline" className="text-[10px] text-muted-foreground group-hover:text-emerald-600">
-                  Pipeline
-                </Badge>
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm group-hover:text-emerald-600 transition-colors">Application Tracker</h3>
-                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                  Organize your applications from Wishlist to Online Assessment, Technical Interview, and Offers.
-                </p>
-              </div>
-            </CardContent>
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+              <Compass className="h-4.5 w-4.5" />
+            </div>
+            <h3 className="text-xs font-bold text-foreground">Technical Roadmaps</h3>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Milestone chapters for {isBJMC ? "Journalism & Content Strategy" : "Frontend, Backend & Full Stack"}.
+            </p>
           </Card>
 
-          {/* Card 3: Alumni Mentorship */}
+          {/* Module 3: Mock Interview System */}
           <Card 
-            onClick={() => navigate("/mentors")}
-            className="group cursor-pointer hover:border-violet-500/50 transition-all hover:shadow-md border-border/60 bg-card/60 hover:-translate-y-0.5"
+            onClick={() => navigate("/mock-interview")}
+            className="border border-border bg-card shadow-sm rounded-2xl cursor-pointer hover:border-violet-500/50 transition-all p-4 space-y-2"
           >
-            <CardContent className="p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="p-2 rounded-lg bg-violet-500/10 text-violet-600">
-                  <GraduationCap className="h-5 w-5" />
-                </div>
-                <Badge variant="outline" className="text-[10px] text-muted-foreground group-hover:text-violet-600">
-                  1:1 Chats
-                </Badge>
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm group-hover:text-violet-600 transition-colors">Alumni Mentorship</h3>
-                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                  Book 1:1 guidance and resume roast sessions with verified alumni at top tech firms.
-                </p>
-              </div>
-            </CardContent>
+            <div className="h-9 w-9 rounded-xl bg-violet-500/10 text-violet-600 flex items-center justify-center">
+              <Swords className="h-4.5 w-4.5" />
+            </div>
+            <h3 className="text-xs font-bold text-foreground">AI Mock Interviews</h3>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Practice real technical and HR questions with immediate scoring feedback.
+            </p>
           </Card>
 
-          {/* Card 4: Placement Vault */}
+          {/* Module 4: Live Jobs Search */}
           <Card 
-            onClick={() => navigate("/vault")}
-            className="group cursor-pointer hover:border-amber-500/50 transition-all hover:shadow-md border-border/60 bg-card/60 hover:-translate-y-0.5"
-          >
-            <CardContent className="p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600">
-                  <FolderArchive className="h-5 w-5" />
-                </div>
-                <Badge variant="outline" className="text-[10px] text-muted-foreground group-hover:text-amber-600">
-                  Templates
-                </Badge>
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm group-hover:text-amber-600 transition-colors">Placement Vault</h3>
-                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                  Battle-tested cold email templates, SQL & DSA cheatsheets, and XYZ bullet generators.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Featured Live Jobs & Interview Bank Quick Banner */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-          <div 
             onClick={() => navigate("/jobs")}
-            className="cursor-pointer p-4 rounded-xl border border-blue-500/20 bg-blue-500/[0.04] hover:bg-blue-500/[0.08] transition-all flex items-center justify-between group"
+            className="border border-border bg-card shadow-sm rounded-2xl cursor-pointer hover:border-blue-500/50 transition-all p-4 space-y-2"
           >
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                <p className="text-xs font-bold text-blue-600 dark:text-blue-400">Live Campus Drives (LinkedIn & Indeed)</p>
-              </div>
-              <h4 className="text-sm font-semibold text-foreground">Explore 12+ Open SDE & Fresher Roles</h4>
-              <p className="text-[11px] text-muted-foreground">Google STEP, Microsoft FTE, Amazon SDE-1, Swiggy, Razorpay</p>
+            <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+              <Globe className="h-4.5 w-4.5" />
             </div>
-            <Button size="sm" variant="ghost" className="text-blue-600 gap-1 group-hover:translate-x-0.5 transition-transform">
-              Browse <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div 
-            onClick={() => navigate("/interview")}
-            className="cursor-pointer p-4 rounded-xl border border-rose-500/20 bg-rose-500/[0.04] hover:bg-rose-500/[0.08] transition-all flex items-center justify-between group"
-          >
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-rose-500" />
-                <p className="text-xs font-bold text-rose-600 dark:text-rose-400">Interview Question Archives</p>
-              </div>
-              <h4 className="text-sm font-semibold text-foreground">Google vs Product Medium vs College Tier</h4>
-              <p className="text-[11px] text-muted-foreground">System design, tree/graph algorithms, OOPs & ACID properties</p>
-            </div>
-            <Button size="sm" variant="ghost" className="text-rose-600 gap-1 group-hover:translate-x-0.5 transition-transform">
-              Practice <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+            <h3 className="text-xs font-bold text-foreground">Live Placement Board</h3>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Browse curated on-campus & off-campus opportunities and track applications.
+            </p>
+          </Card>
         </div>
       </div>
 
-      {/* Analytics Charts & Collab Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Radar Score representation */}
-        <Card className="glass-card">
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><BrainCircuit className="h-4 w-4 text-primary" /> Metrics Distribution</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={260}>
-              <RadarChart data={scoreBreakdown} cx="50%" cy="50%" outerRadius={80}>
-                <PolarGrid stroke="hsl(var(--border))" />
-                <PolarAngleAxis dataKey="metric" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
-                <PolarRadiusAxis tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }} domain={[0, 100]} />
-                <Radar dataKey="score" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.3} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Dynamic completed counts chart */}
-        <Card className="glass-card">
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> completed portfolio milestones</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={[
-                { name: "Roadmap Skills", count: skillsCompleted, fill: "hsl(var(--primary))" },
-                { name: "Mock Practices", count: mockInterviewsCompleted, fill: "hsl(var(--accent))" },
-                { name: "Forum Posts", count: communityContributions, fill: "hsl(var(--chart-3))" }
-              ]}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }} />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Peer meetings and posts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Scheduled Collab sessions */}
-        <Card className="glass-card">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-base flex items-center gap-1.5"><Calendar className="h-4 w-4 text-primary" /> Peer mock sessions</CardTitle>
-              <CardDescription className="text-xs">Join upcoming meets hosted by students</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/collaboration")} className="text-xs text-primary gap-1 h-7">
-              Browse All <ChevronRight className="h-3 w-3" />
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {upcomingSessions.length === 0 ? (
-              <div className="py-6 text-center text-xs text-muted-foreground space-y-2">
-                <p>No active mock meets scheduled.</p>
-                <Button size="sm" variant="outline" onClick={() => navigate("/collaboration")}>Schedule a Meet</Button>
-              </div>
-            ) : (
-              upcomingSessions.slice(0, 3).map((session: any) => (
-                <div key={session._id} className="p-3 rounded-lg border border-border/40 flex items-center justify-between gap-3 bg-muted/20">
-                  <div>
-                    <p className="text-xs font-semibold text-foreground">{session.role}</p>
-                    <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1">
-                      <span>Host: {session.creatorName} ({session.creatorCollege})</span>
-                    </p>
-                  </div>
-                  <Button size="sm" onClick={() => navigate("/collaboration")} className="h-7 text-[10px]">Join</Button>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recently shared placement tips */}
-        <Card className="glass-card">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-base flex items-center gap-1.5"><BookOpen className="h-4 w-4 text-accent" /> Community boards</CardTitle>
-              <CardDescription className="text-xs">Placement threads from peer colleges</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/community")} className="text-xs text-primary gap-1 h-7">
-              View Feed <ChevronRight className="h-3 w-3" />
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {recentPosts.length === 0 ? (
-              <p className="py-6 text-center text-xs text-muted-foreground">No recent posts published.</p>
-            ) : (
-              recentPosts.slice(0, 3).map((post: any) => (
-                <div key={post._id} className="p-3 rounded-lg border border-border/40 bg-muted/20">
-                  <p className="text-xs font-medium text-foreground line-clamp-2">{post.content}</p>
-                  <div className="flex items-center justify-between mt-2 text-[9px] text-muted-foreground">
-                    <span>By: {post.authorName} ({post.authorCollege})</span>
-                    <span className="font-semibold text-primary">{post.tags?.[0] || "General"}</span>
-                  </div>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {/* Analytics Chart */}
+      <Card className="border border-border bg-card shadow-sm rounded-2xl">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-bold flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-primary" /> Placement Competency Distribution
+          </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Current performance across all core placement pillars.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={scoreChartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+              <XAxis dataKey="metric" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: "hsl(var(--card))", 
+                  borderColor: "hsl(var(--border))",
+                  borderRadius: "0.5rem",
+                  fontSize: "11px"
+                }} 
+              />
+              <Bar dataKey="score" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
     </div>
   );
 }

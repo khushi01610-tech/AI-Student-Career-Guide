@@ -7,6 +7,8 @@ export interface IUser extends Document {
   college: string;
   course: string;
   branch: string;
+  degree: string; // "CSE" | "BJMC"
+  academicYear: number; // 1 | 2 | 3 | 4
   graduationYear: number;
   skills: string[];
   careerGoal: string;
@@ -22,6 +24,8 @@ const UserSchema: Schema = new Schema(
     college: { type: String, required: true },
     course: { type: String, required: true },
     branch: { type: String, required: true },
+    degree: { type: String, enum: ["CSE", "BJMC", "Other"], default: "CSE" },
+    academicYear: { type: Number, default: 4 },
     graduationYear: { type: Number, required: true },
     skills: { type: [String], default: [] },
     careerGoal: { type: String, default: "" }
