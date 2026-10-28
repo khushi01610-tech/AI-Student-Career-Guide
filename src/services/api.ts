@@ -376,7 +376,7 @@ export const api = {
 
   // Live Job Board (LinkedIn & Indeed)
   jobs: {
-    getAll: (params?: { q?: string; location?: string; source?: string; type?: string; batch?: string; level?: string }) => {
+    getAll: (params?: { q?: string; location?: string; source?: string; type?: string; batch?: string; level?: string; stream?: string }) => {
       const query = new URLSearchParams();
       if (params?.q) query.append("q", params.q);
       if (params?.location) query.append("location", params.location);
@@ -384,6 +384,7 @@ export const api = {
       if (params?.type && params.type !== "All") query.append("type", params.type);
       if (params?.batch && params.batch !== "All") query.append("batch", params.batch);
       if (params?.level && params.level !== "All") query.append("level", params.level);
+      if (params?.stream && params.stream !== "All") query.append("stream", params.stream);
       return fetch(`${API_BASE_URL}/jobs?${query.toString()}`, {
         method: "GET",
         headers: getHeaders()

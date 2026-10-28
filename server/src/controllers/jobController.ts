@@ -5,10 +5,15 @@ import { checkFallback } from "../config/db";
 
 export const getJobs = async (req: Request, res: Response) => {
   try {
-    const { q, location, source, type, batch, level } = req.query;
+    const { q, location, source, type, batch, level, stream } = req.query;
 
     if (checkFallback()) {
       let jobs = fallbackDb.getCollection("jobs");
+
+      if (stream && stream !== "All") {
+        const streamStr = stream as string;
+        jobs = jobs.filter(j => !j.stream || j.stream === streamStr || j.stream === "Both");
+      }
 
       if (q) {
         const queryLower = (q as string).toLowerCase();
@@ -47,13 +52,29 @@ export const getJobs = async (req: Request, res: Response) => {
     // MongoDB query
     const filter: any = {};
 
-    if (q) {
+    if (stream && stream !== "All") {
       filter.$or = [
-        { title: { $regex: q as string, $options: "i" } },
-        { company: { $regex: q as string, $options: "i" } },
-        { skills: { $in: [new RegExp(q as string, "i")] } },
-        { description: { $regex: q as string, $options: "i" } }
+        { stream: stream as string },
+        { stream: "Both" },
+        { stream: { $exists: false } }
       ];
+    }
+
+    if (q) {
+      const qRegex = { $regex: q as string, $options: "i" };
+      const qCondition = [
+        { title: qRegex },
+        { company: qRegex },
+        { skills: { $in: [new RegExp(q as string, "i")] } },
+        { description: qRegex }
+      ];
+
+      if (filter.$or) {
+        filter.$and = [{ $or: filter.$or }, { $or: qCondition }];
+        delete filter.$or;
+      } else {
+        filter.$or = qCondition;
+      }
     }
 
     if (location) {

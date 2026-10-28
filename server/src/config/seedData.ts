@@ -682,12 +682,179 @@ export const seedData = async () => {
 
       if (checkFallback()) {
         for (const j of mockJobs) {
-          fallbackDb.insert("jobs", j);
+          fallbackDb.insert("jobs", { ...j, stream: "CSE" });
         }
       } else {
-        await Job.insertMany(mockJobs);
+        await Job.insertMany(mockJobs.map(j => ({ ...j, stream: "CSE" })));
       }
       console.log("Seeded LinkedIn & Indeed job listings.");
+    }
+
+    // 🎙️ Ensure BJMC Media & Journalism Jobs Exist in Database
+    const mockBjmcJobs = [
+      {
+        title: "Trainee Broadcast Journalist (Graduate Scheme 2026)",
+        company: "BBC News",
+        location: "New Delhi (Central Delhi)",
+        source: "LinkedIn",
+        stream: "BJMC",
+        type: "Full-time",
+        salary: "₹6.5 - ₹9.0 LPA",
+        level: "Fresher",
+        batchEligibility: ["2025", "2026"],
+        workplaceType: "On-site",
+        description: "Join BBC's South Asia newsroom. Work across radio, television, and digital platforms. Key responsibilities include fact-checking breaking news, gathering audio, conducting vox-pops, and packaging multi-platform news stories under senior editorial supervision.",
+        skills: ["Broadcast Journalism", "Copy Editing", "News Writing", "Media Ethics", "Audio Editing"],
+        applyUrl: "https://www.linkedin.com/jobs/view/bbc-news-trainee-journalist-india",
+        postedDate: "1 day ago",
+        deadline: "November 30, 2026",
+        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/e/eb/BBC.svg"
+      },
+      {
+        title: "Assistant News Producer & Video Journalist",
+        company: "NDTV 24x7",
+        location: "New Delhi / Noida",
+        source: "LinkedIn",
+        stream: "BJMC",
+        type: "Full-time",
+        salary: "₹5.5 - ₹8.0 LPA",
+        level: "Fresher",
+        batchEligibility: ["2025", "2026"],
+        workplaceType: "Hybrid",
+        description: "NDTV 24x7 is hiring Assistant Producers for its primetime news desk. Responsibilities include script writing for teleprompters, coordinating live correspondent OB feeds, Rundown management, and rapid video cuts for digital channels.",
+        skills: ["Teleprompter Scripting", "Adobe Premiere Pro", "Live Rundown", "Video Editing", "Reporting"],
+        applyUrl: "https://www.linkedin.com/jobs/view/ndtv-assistant-producer-campus",
+        postedDate: "3 days ago",
+        deadline: "December 15, 2026",
+        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/2/25/NDTV_logo.svg"
+      },
+      {
+        title: "Staff Reporter & Beat Sub-Editor",
+        company: "The Hindu",
+        location: "Chennai / Bengaluru",
+        source: "Indeed",
+        stream: "BJMC",
+        type: "Full-time",
+        salary: "₹6.0 - ₹8.5 LPA",
+        level: "Fresher",
+        batchEligibility: ["2024", "2025", "2026"],
+        workplaceType: "On-site",
+        description: "Report on civic, educational, and legal beats for The Hindu national edition. Conduct field interviews, file daily stories under deadline pressure, and collaborate with desk editors to ensure objective news standards.",
+        skills: ["Beat Reporting", "Investigative Journalism", "Interviewing", "Media Law", "Proofreading"],
+        applyUrl: "https://www.indeed.com/viewjob?jk=the-hindu-staff-reporter",
+        postedDate: "2 days ago",
+        deadline: "Rolling Admissions",
+        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/7/7b/The_Hindu_logo.svg"
+      },
+      {
+        title: "Corporate Communications & PR Executive",
+        company: "Ogilvy",
+        location: "Mumbai, Maharashtra",
+        source: "LinkedIn",
+        stream: "BJMC",
+        type: "Full-time",
+        salary: "₹7.0 - ₹10.5 LPA",
+        level: "Fresher",
+        batchEligibility: ["2025", "2026"],
+        workplaceType: "Hybrid",
+        description: "Manage public relations for Fortune 500 tech and consumer clients. Draft press releases, media kits, executive holding statements, and organize national press conferences.",
+        skills: ["Public Relations", "Press Releases", "Crisis Management", "Media Relations", "Brand Strategy"],
+        applyUrl: "https://www.linkedin.com/jobs/view/ogilvy-pr-executive-campus",
+        postedDate: "Just now",
+        deadline: "December 5, 2026",
+        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/f/f3/Ogilvy_2018_logo.svg"
+      },
+      {
+        title: "Multimedia Storyteller & Reel Producer",
+        company: "Vox Media",
+        location: "Remote / Hybrid (India)",
+        source: "Indeed",
+        stream: "BJMC",
+        type: "Full-time",
+        salary: "₹8.0 - ₹12.0 LPA",
+        level: "Entry Level",
+        batchEligibility: ["2025", "2026"],
+        workplaceType: "Remote",
+        description: "Transform complex investigative journalism into engaging short-form video reels, YouTube video essays, and social-first graphics. Proficiency in Adobe After Effects, Premiere Pro, and visual narrative pacing required.",
+        skills: ["Adobe Premiere Pro", "After Effects", "Digital Storytelling", "Social Media", "Video Editing"],
+        applyUrl: "https://www.indeed.com/viewjob?jk=vox-media-multimedia-producer",
+        postedDate: "4 days ago",
+        deadline: "Rolling Admissions",
+        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/4/47/Vox_Media_logo.svg"
+      },
+      {
+        title: "Fact-Checking & OSINT Fellow",
+        company: "The Quint",
+        location: "Noida / Remote",
+        source: "LinkedIn",
+        stream: "BJMC",
+        type: "Internship",
+        salary: "₹35,000/month",
+        level: "Internship",
+        batchEligibility: ["2025", "2026", "2027"],
+        workplaceType: "Remote",
+        description: "6-month fellowship identifying and debunking viral misinformation, manipulated media, and deepfakes across WhatsApp, X, and Facebook. Hands-on experience with InVID, Google Reverse Image Search, and archive tools.",
+        skills: ["Fact-Checking", "OSINT Tools", "InVID", "Media Literacy", "Research"],
+        applyUrl: "https://www.linkedin.com/jobs/view/the-quint-factcheck-fellow",
+        postedDate: "1 day ago",
+        deadline: "November 20, 2026",
+        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/6/6c/The_Quint_logo.svg"
+      },
+      {
+        title: "PR Account Coordinator - Financial & Tech Beats",
+        company: "Adfactors PR",
+        location: "Mumbai / Bengaluru",
+        source: "Indeed",
+        stream: "BJMC",
+        type: "Full-time",
+        salary: "₹5.5 - ₹8.0 LPA",
+        level: "Fresher",
+        batchEligibility: ["2025", "2026"],
+        workplaceType: "On-site",
+        description: "India's largest PR consultancy is hiring campus trainees for fintech and enterprise accounts. Responsibilities include daily media monitoring, journalist pitching, drafting op-eds, and media tracking reports.",
+        skills: ["Media Pitching", "Content Writing", "Public Relations", "Client Servicing", "Press Kits"],
+        applyUrl: "https://www.indeed.com/viewjob?jk=adfactors-pr-account-coordinator",
+        postedDate: "5 days ago",
+        deadline: "December 10, 2026",
+        companyLogo: "https://upload.wikimedia.org/wikipedia/en/8/87/Adfactors_PR_logo.png"
+      },
+      {
+        title: "Digital News Curator & Content Strategist",
+        company: "Times Internet",
+        location: "Gurgaon / Noida",
+        source: "LinkedIn",
+        stream: "BJMC",
+        type: "Full-time",
+        salary: "₹6.0 - ₹9.5 LPA",
+        level: "Fresher",
+        batchEligibility: ["2025", "2026"],
+        workplaceType: "Hybrid",
+        description: "Curate 60-word news summaries with high engagement headlines. Analyze audience click-through metrics, SEO keyword trends, and optimize mobile push notifications for 10M+ daily active readers.",
+        skills: ["News Curation", "SEO", "Copywriting", "Headlines", "Analytics"],
+        applyUrl: "https://www.linkedin.com/jobs/view/times-internet-news-curator",
+        postedDate: "3 days ago",
+        deadline: "December 20, 2026",
+        companyLogo: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Times_Internet_logo.svg"
+      }
+    ];
+
+    if (checkFallback()) {
+      const existingJobs = fallbackDb.getCollection("jobs");
+      const hasBjmc = existingJobs.some(j => j.stream === "BJMC");
+      if (!hasBjmc) {
+        for (const bjmcJob of mockBjmcJobs) {
+          fallbackDb.insert("jobs", bjmcJob);
+        }
+        console.log("Seeded BJMC Media & Journalism jobs in fallback DB.");
+      }
+    } else {
+      const bjmcCount = await Job.countDocuments({ stream: "BJMC" });
+      if (bjmcCount === 0) {
+        console.log("Backfilling stream tags and seeding BJMC Media & Journalism jobs in MongoDB...");
+        await Job.updateMany({ stream: { $exists: false } }, { $set: { stream: "CSE" } });
+        await Job.insertMany(mockBjmcJobs);
+        console.log("Successfully seeded BJMC Media & Journalism jobs in MongoDB.");
+      }
     }
 
     // 1. Check if users are seeded

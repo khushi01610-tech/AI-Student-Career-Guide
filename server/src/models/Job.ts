@@ -5,6 +5,7 @@ export interface IJob extends Document {
   company: string;
   location: string;
   source: "LinkedIn" | "Indeed";
+  stream: "CSE" | "BJMC" | "Both";
   type: "Full-time" | "Internship" | "Contract";
   salary: string;
   level: "Entry Level" | "Fresher" | "Internship" | "Mid Level";
@@ -26,6 +27,7 @@ const JobSchema = new Schema<IJob>(
     company: { type: String, required: true },
     location: { type: String, required: true },
     source: { type: String, enum: ["LinkedIn", "Indeed"], required: true },
+    stream: { type: String, enum: ["CSE", "BJMC", "Both"], default: "CSE" },
     type: { type: String, enum: ["Full-time", "Internship", "Contract"], default: "Full-time" },
     salary: { type: String, required: true },
     level: { type: String, enum: ["Entry Level", "Fresher", "Internship", "Mid Level"], default: "Fresher" },
