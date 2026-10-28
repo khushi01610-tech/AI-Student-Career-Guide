@@ -71,6 +71,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         new Promise((_, reject) => setTimeout(() => reject(new Error("Auth timeout")), 3500))
       ]);
       const data: any = await fetchWithTimeout;
+      if (data.profile?.avatarUrl && data.profile.avatarUrl.includes("dicebear")) {
+        data.profile.avatarUrl = "";
+      }
       setUser(data.user);
       setProfile(data.profile);
     } catch (error) {

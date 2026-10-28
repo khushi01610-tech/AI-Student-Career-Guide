@@ -93,7 +93,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const userInitials = getInitials(user?.name || "Student");
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-background text-foreground transition-colors">
         {isAuthenticated && <AppSidebar />}
         <div className="flex-1 flex flex-col min-w-0">
@@ -193,7 +193,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   className="cursor-pointer transition-transform hover:scale-105 shrink-0"
                   title="View Student Profile"
                 >
-                  {profile?.avatarUrl ? (
+                  {profile?.avatarUrl && !profile.avatarUrl.includes("dicebear") ? (
                     <img 
                       src={profile.avatarUrl} 
                       alt="Profile" 

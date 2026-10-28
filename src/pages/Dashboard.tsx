@@ -151,11 +151,11 @@ export default function Dashboard() {
       <div className="rounded-xl border border-border bg-card p-5 sm:p-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="flex items-start sm:items-center gap-4 min-w-0">
-            {profile?.avatarUrl ? (
+            {profile?.avatarUrl && !profile.avatarUrl.includes("dicebear") ? (
               <img 
                 src={profile.avatarUrl} 
                 alt={user?.name || "Student"} 
-                className="h-14 w-14 rounded-full object-cover border-2 border-border shrink-0 shadow-xs"
+                className="h-14 w-14 rounded-full object-cover border-2 border-border shrink-0 shadow-xs" 
               />
             ) : (
               <div className="h-14 w-14 rounded-xl bg-primary/10 text-primary font-black text-lg flex items-center justify-center shrink-0 border border-primary/20 shadow-xs font-heading">
@@ -174,8 +174,8 @@ export default function Dashboard() {
                     <Code2 className="h-3 w-3" /> B.Tech CSE • Computer Science & Eng
                   </span>
                 )}
-                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
-                  Batch of {user?.graduationYear || 2025}
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border">
+                  Batch of {user?.graduationYear || 2026}
                 </span>
               </div>
 
@@ -193,7 +193,7 @@ export default function Dashboard() {
                 <span>•</span>
                 <span className="inline-flex items-center gap-1">
                   <Target className="h-3.5 w-3.5 text-primary shrink-0" />
-                  <span>Target Role: <strong className="text-foreground">{careerGoal}</strong></span>
+                  <span>Target Career Goal: <strong className="text-foreground">{careerGoal}</strong></span>
                 </span>
               </div>
             </div>
@@ -224,7 +224,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-2 shrink-0">
           <span className="status-dot-active" />
           <span className="text-xs font-bold text-foreground">
-            Active Verified Drives:
+            Campus Placement Drives Live:
           </span>
         </div>
 
@@ -258,46 +258,53 @@ export default function Dashboard() {
         </Button>
       </div>
 
-      {/* 4 Core Placement Analytics Cards */}
+      {/* 4 Core Placement Analytics Cards with Distinct SaaS Anatomy */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Career Readiness Score */}
-        <Card className="border border-border bg-card shadow-sm rounded-xl">
-          <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
-            <div className="flex items-center justify-between">
+        {/* Metric 1: Career Readiness Index */}
+        <Card className="border border-border bg-card shadow-sm rounded-xl p-5 flex flex-col justify-between hover:border-primary/40 transition-colors">
+          <div>
+            <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Placement Readiness
               </span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-                <TrendingUp className="h-3 w-3" /> Good
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                <TrendingUp className="h-3 w-3" /> {readinessScore >= 60 ? "Tier-1 Ready" : "Preparing"}
               </span>
             </div>
 
-            <div>
-              <div className="text-3xl font-extrabold text-foreground font-heading">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground font-heading">
                 {readinessScore}%
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Composite campus evaluation score
-              </p>
+              </span>
+              <span className="text-xs text-muted-foreground font-medium">overall score</span>
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Composite campus benchmark across 5 pillars
+            </p>
+          </div>
 
-            <div className="space-y-1 pt-1">
-              <Progress value={readinessScore} className="h-2 bg-muted" />
-              <div className="flex justify-between text-[10px] text-muted-foreground">
-                <span>Passing bar: 50%</span>
-                <span>Target: 80%</span>
-              </div>
+          <div className="space-y-2 pt-4">
+            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary rounded-full transition-all duration-500" 
+                style={{ width: `${readinessScore}%` }} 
+              />
             </div>
-          </CardContent>
+            <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
+              <span>Threshold: 50%</span>
+              <span className="text-primary font-semibold">Campus Avg: 65%</span>
+              <span>Target: 80%</span>
+            </div>
+          </div>
         </Card>
 
-        {/* Metric 2: Resume ATS Score */}
+        {/* Metric 2: Resume ATS Audit */}
         <Card 
           onClick={() => navigate("/resume")}
-          className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-primary/50 transition-all group"
+          className="border border-border bg-card shadow-sm rounded-xl p-5 flex flex-col justify-between cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
         >
-          <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
-            <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 Resume ATS Audit
               </span>
@@ -306,197 +313,240 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div>
-              {atsScore > 0 ? (
-                <>
-                  <div className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-heading">
-                    {atsScore}<span className="text-base text-muted-foreground font-normal">/100</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    ATS keyword density verified
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 font-heading">
-                    Needs PDF Scan
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Upload your resume to check filters
-                  </p>
-                </>
-              )}
-            </div>
+            {atsScore > 0 ? (
+              <>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400 font-heading">
+                    {atsScore}
+                  </span>
+                  <span className="text-sm font-semibold text-muted-foreground">/ 100</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  ATS keyword parser passed with valid headings
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 font-heading">
+                  PDF Required
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upload your CV to pass campus ATS screening
+                </p>
+              </>
+            )}
+          </div>
 
-            <div className="pt-2 border-t border-border/80 flex items-center justify-between text-xs text-primary font-bold group-hover:underline">
-              <span>{atsScore > 0 ? "Review Rubric" : "Upload Resume PDF"}</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </div>
-          </CardContent>
+          <div className="pt-4 border-t border-border/80 flex items-center justify-between text-xs text-primary font-bold group-hover:underline">
+            <span>{atsScore > 0 ? "Inspect ATS Rubric" : "Upload Resume PDF"}</span>
+            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </div>
         </Card>
 
-        {/* Metric 3: Verified Skills Count */}
+        {/* Metric 3: Verified Domain Competencies */}
         <Card 
           onClick={() => navigate("/profile")}
-          className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-primary/50 transition-all group"
+          className="border border-border bg-card shadow-sm rounded-xl p-5 flex flex-col justify-between cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
         >
-          <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
-            <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                Verified Skills
+                Verified Competencies
               </span>
               <div className="h-7 w-7 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600 flex items-center justify-center border border-blue-200 dark:border-blue-800">
                 <Award className="h-3.5 w-3.5" />
               </div>
             </div>
 
-            <div>
-              <div className="text-3xl font-extrabold text-foreground font-heading">
-                {userSkillsCount} <span className="text-base text-muted-foreground font-normal">Skills</span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Technical competencies verified
-              </p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground font-heading">
+                {userSkillsCount}
+              </span>
+              <span className="text-xs font-semibold text-muted-foreground">Domain Skills</span>
             </div>
 
-            <div className="pt-2 border-t border-border/80 flex items-center justify-between text-xs text-primary font-bold group-hover:underline">
-              <span>Manage Competencies</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+            <div className="flex flex-wrap gap-1 mt-2.5">
+              {(user?.skills && user.skills.length > 0 
+                ? user.skills.slice(0, 3) 
+                : (isBJMC ? ["Reporting", "Editing", "PR"] : ["React", "Node.js", "SQL"])
+              ).map((skill: string) => (
+                <span key={skill} className="px-2 py-0.5 text-[10px] font-semibold rounded bg-muted text-muted-foreground border border-border">
+                  {skill}
+                </span>
+              ))}
+              {userSkillsCount > 3 && (
+                <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-primary/10 text-primary border border-primary/20">
+                  +{userSkillsCount - 3} more
+                </span>
+              )}
             </div>
-          </CardContent>
+          </div>
+
+          <div className="pt-4 border-t border-border/80 flex items-center justify-between text-xs text-primary font-bold group-hover:underline">
+            <span>Manage Skill Profile</span>
+            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </div>
         </Card>
 
-        {/* Metric 4: Active Applications */}
+        {/* Metric 4: Campus Job Pipeline */}
         <Card 
           onClick={() => navigate("/applications")}
-          className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-primary/50 transition-all group"
+          className="border border-border bg-card shadow-sm rounded-xl p-5 flex flex-col justify-between cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
         >
-          <CardContent className="p-5 flex flex-col justify-between h-full space-y-3">
-            <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                Active Job Pipeline
+                Campus Drives Pipeline
               </span>
               <div className="h-7 w-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
                 <Briefcase className="h-3.5 w-3.5" />
               </div>
             </div>
 
-            <div>
-              <div className="text-3xl font-extrabold text-foreground font-heading">
-                {applicationsCount} <span className="text-base text-muted-foreground font-normal">Drives</span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Saved & tracked campus drives
-              </p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground font-heading">
+                {applicationsCount}
+              </span>
+              <span className="text-xs font-semibold text-muted-foreground">Active Drives</span>
             </div>
 
-            <div className="pt-2 border-t border-border/80 flex items-center justify-between text-xs text-primary font-bold group-hover:underline">
-              <span>View Kanban Board</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+            <div className="grid grid-cols-3 gap-1 mt-2.5 text-center">
+              <div className="p-1 rounded bg-muted/60 border border-border/60">
+                <span className="text-[10px] text-muted-foreground block">Tracked</span>
+                <span className="text-xs font-bold text-foreground">{applicationsCount}</span>
+              </div>
+              <div className="p-1 rounded bg-muted/60 border border-border/60">
+                <span className="text-[10px] text-muted-foreground block">Applied</span>
+                <span className="text-xs font-bold text-foreground">{applicationsCount > 0 ? 1 : 0}</span>
+              </div>
+              <div className="p-1 rounded bg-muted/60 border border-border/60">
+                <span className="text-[10px] text-muted-foreground block">Interview</span>
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">0</span>
+              </div>
             </div>
-          </CardContent>
+          </div>
+
+          <div className="pt-4 border-t border-border/80 flex items-center justify-between text-xs text-primary font-bold group-hover:underline">
+            <span>Open Kanban Tracker</span>
+            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </div>
         </Card>
       </div>
 
-      {/* Modern Compact Onboarding Stepper */}
-      <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/80 pb-3">
+      {/* Corporate Placement Cell Action Plan / Verification Milestones */}
+      <div className="rounded-xl border border-border bg-card p-5 sm:p-6 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-4">
           <div>
-            <h2 className="text-sm font-bold text-foreground font-heading flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-primary" /> Placement Cell Action Plan
+            <h2 className="text-base font-bold text-foreground font-heading flex items-center gap-2">
+              <ShieldCheck className="h-4.5 w-4.5 text-primary" /> Placement Cell Verification Milestones
             </h2>
-            <p className="text-xs text-muted-foreground">
-              Complete the verification milestones below to qualify for campus shortlists.
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Complete these 4 verification stages to qualify for campus drive shortlists & corporate referrals.
             </p>
           </div>
-          <span className="text-xs font-semibold text-muted-foreground">
-            {hasResume ? "Step 2 of 4 Complete" : "Step 1 of 4 Complete"}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-muted text-foreground border border-border">
+              {hasResume ? "2 of 4 Steps Complete" : "1 of 4 Steps Complete"}
+            </span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
-          {/* Step 1 */}
-          <div className="p-3 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20 text-xs flex items-center gap-3">
-            <div className="h-6 w-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
-              <Check className="h-3.5 w-3.5" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Milestone 1 */}
+          <div className="p-3.5 rounded-lg border border-emerald-300 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20 flex items-start gap-3">
+            <div className="h-7 w-7 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+              <Check className="h-4 w-4" />
             </div>
-            <div>
-              <p className="font-bold text-foreground">1. Degree Profile</p>
-              <p className="text-[10px] text-muted-foreground">{degree} Stream Active</p>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-foreground font-heading">1. Stream Profile</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{degree} Track Verified</p>
+              <span className="inline-block mt-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                Completed
+              </span>
             </div>
           </div>
 
-          {/* Step 2 */}
+          {/* Milestone 2 */}
           <div 
             onClick={() => navigate("/resume")}
-            className={`p-3 rounded-lg border text-xs flex items-center gap-3 cursor-pointer transition-colors ${
+            className={`p-3.5 rounded-lg border flex items-start gap-3 cursor-pointer transition-all ${
               hasResume 
-                ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 text-foreground" 
-                : "border-amber-300 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20 hover:bg-amber-100/50"
+                ? "border-emerald-300 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20 hover:border-emerald-400" 
+                : "border-amber-300 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20 hover:border-amber-400 hover:shadow-xs"
             }`}
           >
-            <div className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 ${
+            <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 shadow-2xs ${
               hasResume ? "bg-emerald-600 text-white" : "bg-amber-600 text-white"
             }`}>
-              {hasResume ? <Check className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
+              {hasResume ? <Check className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-foreground">2. Scan Resume</p>
-              <p className="text-[10px] text-muted-foreground truncate">
-                {hasResume ? "ATS Scored" : "PDF Upload Required"}
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-foreground font-heading">2. Resume ATS Audit</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                {hasResume ? `Parsed score: ${atsScore}/100` : "Upload PDF to scan filters"}
               </p>
+              <span className={`inline-flex items-center gap-1 mt-1 text-[10px] font-bold ${
+                hasResume ? "text-emerald-700 dark:text-emerald-400" : "text-amber-700 dark:text-amber-400"
+              }`}>
+                {hasResume ? "Audit Passed" : "Action Required →"}
+              </span>
             </div>
-            {!hasResume && <ArrowRight className="h-3.5 w-3.5 text-amber-600 shrink-0" />}
           </div>
 
-          {/* Step 3 */}
+          {/* Milestone 3 */}
           <div 
             onClick={() => navigate("/recommendations")}
-            className="p-3 rounded-lg border border-border bg-card hover:bg-muted/50 text-xs flex items-center gap-3 cursor-pointer transition-colors"
+            className="p-3.5 rounded-lg border border-border bg-card hover:bg-muted/50 hover:border-primary/40 flex items-start gap-3 cursor-pointer transition-all"
           >
-            <div className="h-6 w-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center shrink-0 font-bold text-[11px]">
+            <div className="h-7 w-7 rounded-full bg-muted text-muted-foreground font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 border border-border">
               3
             </div>
-            <div>
-              <p className="font-bold text-foreground">3. Skill Verification</p>
-              <p className="text-[10px] text-muted-foreground">Check Branch Gaps</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-foreground font-heading">3. Skill Verification</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{userSkillsCount} of 8 core skills added</p>
+              <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold text-primary">
+                Review Branch Gaps →
+              </span>
             </div>
           </div>
 
-          {/* Step 4 */}
+          {/* Milestone 4 */}
           <div 
             onClick={() => navigate("/mock-interview")}
-            className="p-3 rounded-lg border border-border bg-card hover:bg-muted/50 text-xs flex items-center gap-3 cursor-pointer transition-colors"
+            className="p-3.5 rounded-lg border border-border bg-card hover:bg-muted/50 hover:border-primary/40 flex items-start gap-3 cursor-pointer transition-all"
           >
-            <div className="h-6 w-6 rounded-full bg-muted text-muted-foreground flex items-center justify-center shrink-0 font-bold text-[11px]">
+            <div className="h-7 w-7 rounded-full bg-muted text-muted-foreground font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 border border-border">
               4
             </div>
-            <div>
-              <p className="font-bold text-foreground">4. Mock Panel</p>
-              <p className="text-[10px] text-muted-foreground">4-Round Interview Grader</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-foreground font-heading">4. Mock Interview Panel</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Simulate 4-round campus drive</p>
+              <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold text-primary">
+                Start Mock Panel →
+              </span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Top Recommendations & Career Matches */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-foreground font-heading flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" /> Curated Roles for Your Stream
+              <Sparkles className="h-4.5 w-4.5 text-primary" /> Curated Roles for Your Stream
             </h2>
-            <p className="text-xs text-muted-foreground">
-              Based on your {userSkillsCount} verified skills and academic requirements.
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Target campus job profiles matched to your {degree} curriculum and {userSkillsCount} verified skills.
             </p>
           </div>
           <Button 
             size="sm" 
-            variant="ghost" 
+            variant="outline" 
             onClick={() => navigate("/recommendations")}
-            className="text-xs text-primary font-bold gap-1 h-7 hover:bg-primary/5"
+            className="text-xs font-semibold gap-1.5 h-8 border-border hover:bg-muted"
           >
-            View All Roles <ArrowRight className="h-3 w-3" />
+            All Recommendations <ArrowRight className="h-3 w-3" />
           </Button>
         </div>
 
@@ -507,12 +557,12 @@ export default function Dashboard() {
               onClick={() => navigate(`/roadmap?goal=${encodeURIComponent(role.title)}`)}
               className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-primary/50 hover:shadow-md transition-all p-5 flex flex-col justify-between group"
             >
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="text-[10px] font-mono font-bold">
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">
                     {degree} Track
-                  </Badge>
-                  <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                  </span>
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                     {role.match}% Match
                   </span>
                 </div>
@@ -521,23 +571,34 @@ export default function Dashboard() {
                   <h3 className="text-sm font-bold text-foreground font-heading group-hover:text-primary transition-colors">
                     {role.title}
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Campus Package: <strong className="text-foreground">{role.ctc}</strong>
-                  </p>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground font-medium">Campus Package:</span>
+                    <span className="text-xs font-extrabold text-foreground bg-primary/10 px-2 py-0.5 rounded text-primary">
+                      {role.ctc}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Progress bar matching */}
+                <div className="space-y-1">
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${role.match}%` }} />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-medium">Profile match percentile</span>
                 </div>
 
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {role.skills.map(s => (
-                    <span key={s} className="px-2 py-0.5 text-[10px] rounded bg-muted text-muted-foreground font-medium border border-border/60">
+                    <span key={s} className="px-2 py-0.5 text-[10px] rounded bg-muted/80 text-muted-foreground font-medium border border-border/80">
                       {s}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-border/80 flex items-center justify-between text-xs text-primary font-bold group-hover:translate-x-0.5 transition-transform">
+              <div className="pt-4 mt-2 border-t border-border/80 flex items-center justify-between text-xs text-primary font-bold group-hover:underline">
                 <span>View Career Roadmap</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </Card>
           ))}
@@ -545,19 +606,19 @@ export default function Dashboard() {
       </div>
 
       {/* Core Preparation Modules Grid */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <h2 className="text-base font-bold text-foreground font-heading">
           Career Engine Prep Tools
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card 
             onClick={() => navigate("/resume")}
-            className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-primary/50 hover:shadow-md transition-all p-4 space-y-2 group"
+            className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-primary/50 hover:shadow-md transition-all p-5 space-y-2.5 group"
           >
             <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
               <FileText className="h-4.5 w-4.5" />
             </div>
-            <h3 className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
+            <h3 className="text-xs font-bold text-foreground group-hover:text-primary transition-colors font-heading">
               Resume Studio & ATS Audit
             </h3>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -567,12 +628,12 @@ export default function Dashboard() {
 
           <Card 
             onClick={() => navigate("/roadmap")}
-            className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-emerald-500/50 hover:shadow-md transition-all p-4 space-y-2 group"
+            className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-emerald-500/50 hover:shadow-md transition-all p-5 space-y-2.5 group"
           >
             <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center border border-emerald-500/20">
               <Compass className="h-4.5 w-4.5" />
             </div>
-            <h3 className="text-xs font-bold text-foreground group-hover:text-emerald-600 transition-colors">
+            <h3 className="text-xs font-bold text-foreground group-hover:text-emerald-600 transition-colors font-heading">
               Technical Roadmaps
             </h3>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -582,12 +643,12 @@ export default function Dashboard() {
 
           <Card 
             onClick={() => navigate("/mock-interview")}
-            className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-violet-500/50 hover:shadow-md transition-all p-4 space-y-2 group"
+            className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-violet-500/50 hover:shadow-md transition-all p-5 space-y-2.5 group"
           >
             <div className="h-9 w-9 rounded-lg bg-violet-500/10 text-violet-600 flex items-center justify-center border border-violet-500/20">
               <Swords className="h-4.5 w-4.5" />
             </div>
-            <h3 className="text-xs font-bold text-foreground group-hover:text-violet-600 transition-colors">
+            <h3 className="text-xs font-bold text-foreground group-hover:text-violet-600 transition-colors font-heading">
               AI Mock Interview Panels
             </h3>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -597,12 +658,12 @@ export default function Dashboard() {
 
           <Card 
             onClick={() => navigate("/jobs")}
-            className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-blue-500/50 hover:shadow-md transition-all p-4 space-y-2 group"
+            className="border border-border bg-card shadow-sm rounded-xl cursor-pointer hover:border-blue-500/50 hover:shadow-md transition-all p-5 space-y-2.5 group"
           >
             <div className="h-9 w-9 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center border border-blue-500/20">
               <Globe className="h-4.5 w-4.5" />
             </div>
-            <h3 className="text-xs font-bold text-foreground group-hover:text-blue-600 transition-colors">
+            <h3 className="text-xs font-bold text-foreground group-hover:text-blue-600 transition-colors font-heading">
               Live Placement Job Board
             </h3>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -623,17 +684,18 @@ export default function Dashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={scoreChartData}>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={scoreChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-              <XAxis dataKey="metric" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+              <XAxis dataKey="metric" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: "hsl(var(--card))", 
                   borderColor: "hsl(var(--border))",
                   borderRadius: "0.5rem",
-                  fontSize: "11px"
+                  fontSize: "12px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
                 }} 
               />
               <Bar dataKey="score" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />

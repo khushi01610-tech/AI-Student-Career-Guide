@@ -70,7 +70,7 @@ export const register = async (req: Request, res: Response) => {
       // Create a profile in fallback
       fallbackDb.insert("profiles", {
         user: savedUser._id,
-        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+        avatarUrl: "",
         bio: `${selectedDegree} Student at ${college}`,
         projects: [],
         achievements: [],
@@ -101,7 +101,7 @@ export const register = async (req: Request, res: Response) => {
       // Create a profile
       const newProfile = new Profile({
         user: savedUser._id,
-        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+        avatarUrl: "",
         bio: `${selectedDegree} Student at ${college}`,
         projects: [],
         achievements: [],

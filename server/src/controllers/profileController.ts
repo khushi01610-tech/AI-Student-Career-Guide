@@ -50,7 +50,7 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
 
     if (!profile) {
       // Create profile if missing
-      const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}`;
+      const avatarUrl = "";
       if (checkFallback()) {
         profile = fallbackDb.insert("profiles", {
           user: userId,

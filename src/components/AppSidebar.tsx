@@ -200,7 +200,7 @@ export function AppSidebar() {
           title="Click to view and edit your student profile"
           className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-sidebar-accent transition-colors cursor-pointer group"
         >
-          {profile?.avatarUrl ? (
+          {profile?.avatarUrl && !profile.avatarUrl.includes("dicebear") ? (
             <img 
               src={profile.avatarUrl} 
               alt={displayName}
