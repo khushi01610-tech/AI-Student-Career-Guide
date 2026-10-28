@@ -222,7 +222,7 @@ export default function JobSearch() {
                 onClick={() => setSelectedType(t)}
                 className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${
                   selectedType === t
-                    ? "bg-card text-foreground shadow-xs font-semibold"
+                    ? "bg-card text-foreground shadow-sm font-semibold"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -242,7 +242,7 @@ export default function JobSearch() {
                 onClick={() => setSelectedBatch(b)}
                 className={`px-2 py-0.5 rounded text-xs transition-all ${
                   selectedBatch === b
-                    ? "bg-card text-foreground font-semibold shadow-xs"
+                    ? "bg-card text-foreground font-semibold shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >

@@ -424,7 +424,7 @@ export default function Profile() {
                           onClick={() => handleToggleSkill(skill)}
                           className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition-all flex items-center gap-1.5 ${
                             isSelected 
-                              ? "bg-primary text-primary-foreground border-primary shadow-xs font-semibold" 
+                              ? "bg-primary text-primary-foreground border-primary shadow-sm font-semibold" 
                               : "bg-muted/40 hover:bg-muted text-foreground border-border hover:border-border/80"
                           }`}
                         >

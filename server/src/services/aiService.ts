@@ -430,14 +430,207 @@ Tell me about your target role, and let's get you placement-ready!`;
       }
     }
 
-    // Mock Questions calibrated to Tier / Difficulty
+    // Mock Questions calibrated to Stream and Tier / Difficulty
     await new Promise(resolve => setTimeout(resolve, 800));
 
+    const roleLower = (role || "").toLowerCase();
     const diffLower = (difficulty || "").toLowerCase();
+    const typeLower = (type || "").toLowerCase();
+
+    const isBJMC = 
+      roleLower.includes("bjmc") ||
+      roleLower.includes("journalism") ||
+      roleLower.includes("reporter") ||
+      roleLower.includes("media") ||
+      roleLower.includes("broadcast") ||
+      roleLower.includes("pr") ||
+      roleLower.includes("public relations") ||
+      roleLower.includes("content") ||
+      roleLower.includes("editor") ||
+      roleLower.includes("writer") ||
+      roleLower.includes("anchor") ||
+      roleLower.includes("communication") ||
+      diffLower.includes("bjmc") ||
+      typeLower.includes("bjmc") ||
+      typeLower.includes("journalism") ||
+      typeLower.includes("media");
+
+    // ==========================================
+    // 🎙️ BJMC (JOURNALISM & MASS COMMUNICATION)
+    // ==========================================
+    if (isBJMC) {
+      // 🔴 1. NATIONAL MEDIA & BROADCASTERS TIER (BBC / NDTV / The Hindu / Reuters Level)
+      if (diffLower.includes("google") || diffLower.includes("hard") || diffLower.includes("senior") || diffLower.includes("national") || diffLower.includes("lead")) {
+        return {
+          stream: "BJMC",
+          questions: [
+            {
+              question: "A high-ranking cabinet official issues a legal cease-and-desist threatening criminal defamation under Section 499 IPC over your upcoming investigative story on procurement kickbacks. How do you evaluate your legal defenses (Truth for Public Good, Fair Comment) and safeguard your newsroom before proceeding to broadcast?",
+              category: "Media Law & Defamation",
+              difficulty: "National Broadcaster Level",
+              companyTag: "BBC News / NDTV",
+              sampleAnswer: "Under Indian jurisprudence (Section 499 IPC Exceptions 1 and 2), truth substantiated by documented evidence and published for the public good is a complete defense against defamation. Before publication, I ensure: 1) Every assertion has documentary proof (RTI responses, audited accounts, official tender filings), 2) A formal, time-stamped questionnaire was delivered to the official offering 48 hours for right of reply, 3) The piece has been vetted by newsroom legal counsel, and 4) Confidential whistleblower source coordinates are encrypted and kept strictly off vulnerable email servers.",
+              tips: ["Mention the 'Right of Reply' protocol and timestamping", "Reference IPC Section 499 Exceptions (Truth for Public Good)", "Explain encryption for whistleblower safety (Signal, air-gapped drives)"]
+            },
+            {
+              question: "Your primary whistleblower source provided confidential state procurement contracts exposing systemic corruption. A judicial committee subpoenas you to hand over source notes and call records under contempt of court. How do you ethically navigate source protection vs judicial compliance?",
+              category: "Investigative Journalism Ethics",
+              difficulty: "National Broadcaster Level",
+              companyTag: "The Hindu / Reuters",
+              sampleAnswer: "Journalistic ethics (SPJ Code of Ethics and Press Council of India standards) demand unwavering protection of confidential sources who risk their livelihoods to expose wrongdoing. In court, I would state that preserving source anonymity is fundamental to the constitutional guarantee of freedom of speech (Article 19(1)(a)). I would provide the published documents and verified data without compromising identifying source metadata, while filing an appeal with senior editorial counsel asserting journalistic privilege.",
+              tips: ["Cite Article 19(1)(a) Freedom of Speech and Press Council guidelines", "Distinguish between handing over public documents vs private identifying metadata", "Demonstrate institutional backbone and editorial solidarity"]
+            },
+            {
+              question: "You are anchoring a live primetime breaking news broadcast when the studio teleprompter abruptly crashes, and unverified conflicting reports of casualties in a train derailment flood social media. How do you maintain responsible broadcast continuity without inciting panic?",
+              category: "Live Broadcast & Crisis Anchoring",
+              difficulty: "National Broadcaster Level",
+              companyTag: "NDTV 24x7 / India Today",
+              sampleAnswer: "First, stay calm and maintain steady eye contact with the active tally light. Do not rush to fill dead air with unverified numbers. Second, acknowledge the developing situation transparently: 'We are receiving unconfirmed initial reports of an accident in Balasore. Our field correspondents are establishing contact with railway authorities.' Third, instruct the control room (PCR) to bring in the regional bureau reporter or railway spokesperson while I reference hardcopy rundown sheets. Never report unverified casualty figures from Twitter until certified by the designated relief commissioner.",
+              tips: ["Prioritize accuracy over speed in live breaking situations", "Demonstrate unscripted composure and control-room communication", "Quote official emergency helplines and certified nodal officers"]
+            },
+            {
+              question: "Tell me about a time you faced intense editorial pushback or a conflict of interest when pursuing an investigative story that threatened an institutional sponsor or influential advertiser.",
+              category: "Editorial Leadership & Integrity",
+              difficulty: "National Broadcaster Level",
+              companyTag: "The Wire / Indian Express",
+              sampleAnswer: "In our campus media syndicate, we uncovered irregularities in campus catering contracts where the primary vendor was also a key sponsor for our annual fest. The student council attempted to suppress the article. I met with the editorial board, presented our audit data, invoices, and hygiene test results, and demonstrated that student health outweighed sponsorship optics. We published the story with a balanced statement from the caterer, resulting in a transparent re-tendering process.",
+              tips: ["Frame the dilemma around public trust vs commercial convenience", "Show you sought the subject's rebuttal fairly", "Emphasize facts and documented records rather than emotional rhetoric"]
+            }
+          ],
+          generalTips: [
+            "In media interviews, precision and attribution are paramount: never use phrases like 'everybody knows'.",
+            "Be well-versed in landmark media law cases (e.g., R. Rajagopal vs State of Tamil Nadu, Romesh Thappar).",
+            "Demonstrate fluency with digital verification tools (InVID, Google Reverse Image Search, WayBack Machine)."
+          ],
+          commonMistakes: [
+            "Confusing opinion/commentary with factual objective reporting.",
+            "Failing to mention the subject's right to respond (Audi Alteram Partem).",
+            "Treating viral social media tweets as primary verified sources."
+          ],
+          bodyLanguageTips: [
+            "Maintain steady eye contact and articulate with clear diction and vocal modulation.",
+            "Avoid excessive hand gestures; sit upright with an attentive newsroom posture."
+          ]
+        };
+      }
+
+      // 🟡 2. DIGITAL MEDIA HOUSES & PR AGENCIES (Vox / Quint / Ogilvy / Edelman / Inshorts Level)
+      if (diffLower.includes("medium") || diffLower.includes("product") || diffLower.includes("mid") || diffLower.includes("digital")) {
+        return {
+          stream: "BJMC",
+          questions: [
+            {
+              question: "A manipulated 20-second video of an industrialist or political leader with cloned audio is trending on X (Twitter) with over 3 million impressions. Detail your newsroom OSINT verification protocol before publishing a fact-check.",
+              category: "Fact Checking & OSINT Verification",
+              difficulty: "Digital Media Level",
+              companyTag: "The Quint / BoomLive",
+              sampleAnswer: "Our fact-checking protocol involves 4 stages: 1) Extraction: Download the source video without lossy re-encoding; 2) Reverse Image Analysis: Break into keyframes using InVID or ffmpeg and run Google/Yandex reverse image lookups to locate earlier matching broadcasts; 3) Audio Spectrogram Analysis: Examine waveform discontinuities, ambient background noise dropouts, and robotic frequencies characteristic of AI voice cloning; 4) Human Corroboration: Contact the official spokesperson and attendees present at the supposed event. We then publish a claim review with clear archival evidence and side-by-side frame comparisons.",
+              tips: ["Mention InVID, WeVerify, or TinEye reverse image search", "Explain audio spectral analysis for AI cloned voices", "Detail how claim reviews and debunk articles are structured"]
+            },
+            {
+              question: "You are the PR Lead for a quick-commerce unicorn. A delivery partner's scooter brake failure causes an injury that sparks trending boycotts online. What is your 60-minute crisis communication and holding statement strategy?",
+              category: "Crisis PR & Corporate Communications",
+              difficulty: "Agency / Corporate Level",
+              companyTag: "Ogilvy / Edelman",
+              sampleAnswer: "Within the first 15 minutes, assemble the rapid-response crisis unit (Legal, Fleet Operations, HR, Comms) and establish verified ground facts. By Minute 30, issue a concise, compassionate Holding Statement across official channels: 'We are deeply concerned about the incident in South Mumbai. Our emergency care team has rushed to the hospital to support our partner, covering 100% of medical expenses. An internal fleet safety audit is actively underway, and we will share full findings by 5 PM.' By Minute 60, brief all customer support reps with approved talking points, avoiding premature legal liability while leading with empathy.",
+              tips: ["Never say 'No comment' or stay silent in a digital crisis", "Structure response: Empathy -> Concrete Remediation -> Timed Updates", "Prepare FAQ internal holding lines for frontline support agents"]
+            },
+            {
+              question: "You have a 3,000-word investigative piece on groundwater depletion caused by beverage bottling plants. How do you repurpose this across an Instagram Reel, a Substack newsletter lead, and an SEO web headline without sensationalizing the core findings?",
+              category: "Digital Content Strategy & Multi-Platform Packaging",
+              difficulty: "Digital Media Level",
+              companyTag: "Vox Media / Scroll.in",
+              sampleAnswer: "For Web/SEO: Focus on search intent and geography, e.g., 'Groundwater Crisis: How Bottling Plants Are Drying Up Wells in Western UP — Investigation'. For Instagram Reel (45s): Hook viewers with visual contrast — start with a farmer pumping an empty borewell, cut to factory water tankers with animated data charts, and end with 'Link in bio for full 6-month investigation'. For Substack: Frame with personal voice and behind-the-scenes methodology: 'The water test results they didn't want us to see: what our 40 soil samples uncovered.' Each format tailors the hook to the platform's user behavior while preserving factual integrity.",
+              tips: ["Distinguish between curiosity hooks and dishonest clickbait", "Emphasize visual data storytelling for mobile audiences", "Mention keyword search volume (SEO) vs narrative hook (Newsletter)"]
+            },
+            {
+              question: "Describe a high-pressure interview where the subject evaded answering questions with scripted PR talking points. How did you politely redirect the interview back to the critical facts?",
+              category: "Interviewing Technique & Editorial Persistence",
+              difficulty: "Digital Media Level",
+              companyTag: "Newslaundry / Frontline",
+              sampleAnswer: "When an interviewee redirects with scripted platitudes, I acknowledge their statement politely and immediately re-anchor the question to an undeniable empirical datum: 'I appreciate the company's commitment to community programs, but the municipal pollution board's report specifically noted chemical effluent levels 4 times above the permissible limit in March. What specific filtration upgrade was installed to address that finding?' Polite persistence with hard data prevents defensiveness while cutting through spin.",
+              tips: ["Demonstrate polite assertiveness without hostility", "Anchor follow-ups to specific metrics or third-party documents", "Show respect for audience time and clarity"]
+            }
+          ],
+          generalTips: [
+            "Understand the economics of digital media: CTR, retention rate, scroll depth, and reader engagement.",
+            "Show familiarity with content management systems (WordPress, Ghost) and media creation tools (Premiere, Canva).",
+            "Emphasize ethics and accountability in viral content creation."
+          ],
+          commonMistakes: [
+            "Over-optimizing for clickbait at the cost of journalistic credibility.",
+            "Failing to segment audience demographics across platforms.",
+            "Ignoring copyright, fair use, and licensing rights of media assets."
+          ],
+          bodyLanguageTips: [
+            "Speak energetically and demonstrate enthusiasm for digital storytelling.",
+            "Use clear, conversational language suitable for contemporary multimedia."
+          ]
+        };
+      }
+
+      // 🟢 3. CAMPUS PLACEMENT / ENTRY LEVEL MEDIA TIER (College Drives / Trainee Reporter / Content Associate)
+      return {
+        stream: "BJMC",
+        questions: [
+          {
+            question: "Explain the Inverted Pyramid structure in news writing. What are the 5 Ws and 1 H, and how do you compose an effective 25-word Lead (Intro) for a breaking campus or civic story?",
+            category: "Core Print & Digital Journalism Fundamentals",
+            difficulty: "Campus Placement Level",
+            companyTag: "Times Group / Indian Express Campus Drive",
+            sampleAnswer: "The Inverted Pyramid places the most critical, newsworthy facts at the very top (the lead), followed by supporting background details, and concluding with general historical context. The 5 Ws and 1 H are: Who, What, When, Where, Why, and How. A concise 25-word lead: 'Delhi University approved a 15% hostel fee rollback on Tuesday following a three-day sit-in protest by over 500 student union representatives.' It answers Who, What, When, and Why in a single crisp sentence.",
+            tips: ["Keep the lead sentence under 25-30 words", "Ensure the primary action verb is active, not passive", "Explain why inverted pyramid allows editors to trim from the bottom"]
+          },
+          {
+            question: "What are the structural components of a professional Press Release? How does a media desk distinguish legitimate news value from commercial corporate promotion?",
+            category: "Public Relations & Media Releases",
+            difficulty: "Campus Placement Level",
+            companyTag: "Adfactors PR / Weber Shandwick",
+            sampleAnswer: "A standard press release includes: 1) FOR IMMEDIATE RELEASE timestamp, 2) Compelling, factual headline, 3) Dateline (City, Date), 4) The Lead paragraph summarizing the announcement, 5) Body paragraphs with supporting data, 6) An executive quote providing perspective, 7) Company Boilerplate ('About Us'), and 8) Media Relations Contact Info. Editors filter releases based on public relevance, timeliness, human interest, and verifiable numbers rather than self-congratulatory jargon.",
+            tips: ["Name all 8 structural elements of a standard PR kit", "Emphasize high news value over self-promotional fluff", "Mention high-res media kit download links"]
+          },
+          {
+            question: "What ethical and legal precautions must a media professional observe when reporting on children, crime victims, or sub-judice court matters under Press Council of India guidelines?",
+            category: "Media Ethics & Legal Guidelines",
+            difficulty: "Campus Placement Level",
+            companyTag: "Press Council / Newsroom Onboarding",
+            sampleAnswer: "Under POCSO Act (Section 74) and Press Council guidelines: 1) The identity, photograph, school, or address of juvenile offenders or child victims must never be revealed; 2) For sexual assault survivors (IPC Section 228A), identity must be strictly protected regardless of consent; 3) In ongoing court trials (sub-judice), reporting must be strictly factual based on court proceedings without running parallel 'media trials' that prejudice judges or witnesses.",
+            tips: ["Reference IPC Section 228A and POCSO protection provisions", "Highlight avoiding sensationalism or intrusive grief reporting", "Emphasize respect for privacy and human dignity"]
+          },
+          {
+            question: "Walk me through your journalism portfolio, college documentary, or beat reporting project. What story did you break, how did you gather sources, and what editorial challenge did you overcome?",
+            category: "Campus HR & Portfolio Presentation",
+            difficulty: "Campus Placement Level",
+            companyTag: "Media Placement Interview Board",
+            sampleAnswer: "I am a graduating BJMC student specializing in digital investigative reporting and multimedia production. For our final capstone project, I produced a 12-minute documentary on e-waste recycling hazards in Seelampur, Delhi. I conducted 8 on-ground interviews with informal recyclers and environmental chemists, validating heavy metal contamination data. The primary challenge was earning the trust of local workers fearful of municipal raids; I addressed this by spending 3 days observing without cameras, clearly explaining our reporting purpose, and guaranteeing facial anonymization where requested.",
+            tips: ["Structure introduction around your specific reporting beat (e.g., civic, business, culture, tech)", "Highlight primary on-ground sourcing over internet aggregation", "State video editing or podcast tools you mastered (Premiere, Audacity, Descript)"]
+          }
+        ],
+        generalTips: [
+          "Read national newspapers (The Hindu, Indian Express) daily before attending campus interviews.",
+          "Keep your portfolio (articles, video showreels, podcast clips) organized in a clean digital link.",
+          "Be ready to pitch 3 original story ideas for the publication you are interviewing with."
+        ],
+        commonMistakes: [
+          "Not knowing the names of senior editors and columnists of the hiring publication.",
+          "Using passive voice, jargon, or flowery academic prose instead of direct journalistic clarity.",
+          "Expressing biased political opinions during objective news reporting discussions."
+        ],
+        bodyLanguageTips: [
+          "Speak with confident projection and natural inflection.",
+          "Listen actively and jot down key question points on a notepad before answering."
+        ]
+      };
+    }
+
+    // ==========================================
+    // 💻 B.TECH (COMPUTER SCIENCE & ENGINEERING)
+    // ==========================================
 
     // 🔴 1. GOOGLE / FAANG TIER (Hard / Advanced)
     if (diffLower.includes("google") || diffLower.includes("faang") || diffLower.includes("hard") || diffLower.includes("senior")) {
       return {
+        stream: "CSE",
         questions: [
           {
             question: "Given a massive stream of integers coming from millions of client devices, design an algorithm to find the Median in O(1) time and O(N) space. How would you handle distributed workers?",
@@ -492,6 +685,7 @@ Tell me about your target role, and let's get you placement-ready!`;
     // 🟡 2. PRODUCT MEDIUM TIER (Unicorns: Swiggy, Razorpay, Flipkart, Uber, Atlassian)
     if (diffLower.includes("medium") || diffLower.includes("product") || diffLower.includes("mid")) {
       return {
+        stream: "CSE",
         questions: [
           {
             question: "Given a Binary Tree, find the Lowest Common Ancestor (LCA) of two given nodes without storing parent pointers. What is the optimal time and space complexity?",
@@ -542,6 +736,7 @@ Tell me about your target role, and let's get you placement-ready!`;
 
     // 🟢 3. COLLEGE / CAMPUS PLACEMENT TIER (Foundational - TCS Digital, Infosys, Wipro, College Drives)
     return {
+      stream: "CSE",
       questions: [
         {
           question: "Explain the Four Pillars of Object-Oriented Programming (OOP) with real-world examples in Java or C++. How does runtime polymorphism differ from compile-time polymorphism?",
@@ -616,27 +811,42 @@ Tell me about your target role, and let's get you placement-ready!`;
       }
     }
 
-    // Mock Evaluation
+    // Mock Evaluation calibrated to question domain
     await new Promise(resolve => setTimeout(resolve, 800));
     const wordCount = answer.trim().split(/\s+/).length;
+    const isJournalismQ = 
+      /\b(defamation|journalism|sources?|broadcast(ing)?|teleprompter|media|press\s*release|pr|editorial|fact-?check|osint|holding\s*statement|inverted\s*pyramid|pocso|reporter|reporting|anchoring?)\b/i.test(question || "");
+
     let score = 55;
     let quality = "Needs Improvement";
-    let relevance = "Partial relevance. Answer lacks specific details or keywords.";
-    let confidence = "Moderate. Tones feel slightly hesitant or short.";
-    let communication = "Clear but too brief. Needs elaboration.";
-    let clarity = "Grammar is correct, but the explanation is too simple.";
-    let suggestions = "Explain key terms. Give a practical example from a project you completed.";
-    let improvedAnswer = "I believe the Virtual DOM is a performance optimization layer. For example, in a React app I built, when a list item changes, React updates the virtual DOM list first and re-renders only that specific item in the browser, saving unnecessary renders.";
+    let relevance = "Partial relevance. Answer lacks specific details or industry keywords.";
+    let confidence = "Moderate. Tone feels slightly hesitant or overly brief.";
+    let communication = "Clear but too brief. Needs elaboration and concrete examples.";
+    let clarity = "Grammar is acceptable, but the structure lacks depth.";
+    
+    let suggestions = isJournalismQ
+      ? "Reference legal protections (e.g., Fair Comment, public interest), verifiable sources, and editorial standards. Give a concrete reporting example."
+      : "Explain key technical terms. Give a practical architectural example from a project you built.";
+
+    let improvedAnswer = isJournalismQ
+      ? `A stronger journalistic response: "In this situation, accuracy takes precedence over speed. I would first verify the facts using primary documents, grant the subject adequate time for right of reply, and consult our newsroom's legal counsel to ensure compliance with Press Council standards."`
+      : `A stronger engineering response: "I would approach this by breaking down the time and space complexity first. For example, by introducing an in-memory cache and atomic database updates, we ensure sub-millisecond response times while preventing race conditions."`;
 
     if (wordCount > 30) {
-      score = 82;
-      quality = "Good Answer";
-      relevance = "Highly relevant. Touches upon key concepts of virtual DOM and reconciliation.";
-      confidence = "Strong and professional articulation.";
-      communication = "Good structure and pace. Clear flow of ideas.";
-      clarity = "Well explained. Easily understandable technical breakdown.";
-      suggestions = "Flesh out details about reconciliation diffing algorithms and render cycles.";
-      improvedAnswer = `Excellent structure. A slightly stronger version: "React utilizes an in-memory Virtual DOM cache. On state changes, it performs a diffing algorithm (reconciliation) and groups the modifications in a single update, improving UI responsiveness."`;
+      score = 84;
+      quality = "Strong Professional Answer";
+      relevance = isJournalismQ 
+        ? "Highly relevant. Demonstrates keen editorial judgment, media ethics, and attribution standards."
+        : "Highly relevant. Addresses core engineering principles, constraints, and operational trade-offs.";
+      confidence = "Strong, authoritative, and professional tone.";
+      communication = "Good structure and clarity. Ideas flow logically.";
+      clarity = "Well-articulated with clear reasoning.";
+      suggestions = isJournalismQ
+        ? "To elevate to senior editorial level, mention specific media regulatory frameworks or verified digital OSINT tools."
+        : "To elevate to FAANG level, proactively address edge cases, fault tolerance, and scaling trade-offs.";
+      improvedAnswer = isJournalismQ
+        ? `Polished newsroom response: "${answer.trim()} Furthermore, I would ensure every claim is backed by on-the-record attribution, archival timestamps, and an objective tone that preserves public trust."`
+        : `Polished engineering response: "${answer.trim()} In production, I would also establish Prometheus alerting metrics and circuit breakers to handle downstream service degradation gracefully."`;
     }
 
     return {
