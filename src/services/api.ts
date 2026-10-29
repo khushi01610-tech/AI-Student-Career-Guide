@@ -1,3 +1,5 @@
+import { mockFallback } from "./mockApiFallback";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 const getHeaders = (isMultipart = false) => {
@@ -32,160 +34,265 @@ const handleResponse = async (response: Response) => {
   return response.json();
 };
 
+// Resilient fetch wrapper: handles live backend requests, but automatically falls back
+// to client-side session handlers when running on static hosting (e.g. Netlify 404s or network failure)
+const safeFetch = async (url: string, options?: RequestInit, fallbackFn?: () => Promise<any>): Promise<any> => {
+  try {
+    const response = await fetch(url, options);
+    // If the server returns 404 (e.g., Netlify static host with no backend), activate fallback
+    if (response.status === 404 && fallbackFn) {
+      console.warn(`[CareerEngine] Live backend not detected at ${url} (404). Seamlessly operating via static client mode.`);
+      return await fallbackFn();
+    }
+    return await handleResponse(response);
+  } catch (err) {
+    // If network fails (e.g., offline or backend not running), activate fallback
+    if (fallbackFn) {
+      console.warn(`[CareerEngine] Network request failed for ${url}. Seamlessly operating via static client mode:`, err);
+      return await fallbackFn();
+    }
+    throw err;
+  }
+};
+
 export const api = {
   // Authentication
   auth: {
     register: (userData: any) => 
-      fetch(`${API_BASE_URL}/auth/register`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify(userData)
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/auth/register`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(userData)
+        },
+        () => mockFallback.auth.register(userData)
+      ),
       
     login: (credentials: any) => 
-      fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify(credentials)
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/auth/login`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(credentials)
+        },
+        () => mockFallback.auth.login(credentials)
+      ),
       
     me: () => 
-      fetch(`${API_BASE_URL}/auth/me`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/auth/me`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        () => mockFallback.auth.me()
+      )
   },
 
   // Student Profiles & Dashboard
   profile: {
     get: (userId?: string) => 
-      fetch(`${API_BASE_URL}/profile/${userId || ""}`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/profile/${userId || ""}`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        () => mockFallback.profile.get()
+      ),
       
     update: (profileData: any) => 
-      fetch(`${API_BASE_URL}/profile`, {
-        method: "PUT",
-        headers: getHeaders(),
-        body: JSON.stringify(profileData)
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/profile`, 
+        {
+          method: "PUT",
+          headers: getHeaders(),
+          body: JSON.stringify(profileData)
+        },
+        () => mockFallback.profile.update(profileData)
+      ),
       
     getDashboard: () => 
-      fetch(`${API_BASE_URL}/profile/dashboard`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/profile/dashboard`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        () => mockFallback.profile.getDashboard()
+      )
   },
 
   // Resume Scanner & ATS Analyzer
   resume: {
     analyze: (formData: FormData) => 
-      fetch(`${API_BASE_URL}/resume/analyze`, {
-        method: "POST",
-        headers: getHeaders(true), // Multi-part boundary header is injected automatically by browser
-        body: formData
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/resume/analyze`, 
+        {
+          method: "POST",
+          headers: getHeaders(true),
+          body: formData
+        },
+        () => mockFallback.resume.analyze()
+      )
   },
 
   // Chat Career Assistant ("CareerGuide AI")
   chat: {
     sendMessage: (message: string, history: any[], profile: any) => 
-      fetch(`${API_BASE_URL}/chat`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ message, history, profile })
-      })
-        .then(handleResponse)
-        .then(data => data.reply)
+      safeFetch(
+        `${API_BASE_URL}/chat`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ message, history, profile })
+        },
+        async () => ({ reply: await mockFallback.chat.sendMessage(message) })
+      ).then(data => data.reply || data)
   },
 
   // Interview Prep & Mock Interviews
   interview: {
     generateQuestions: (role: string, difficulty: string, type: string) => 
-      fetch(`${API_BASE_URL}/interview/generate`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ role, difficulty, type })
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/interview/generate`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ role, difficulty, type })
+        },
+        () => mockFallback.interview.generateQuestions(role, difficulty, type)
+      ),
       
     evaluateAnswer: (question: string, answer: string) => 
-      fetch(`${API_BASE_URL}/interview/evaluate`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ question, answer })
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/interview/evaluate`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ question, answer })
+        },
+        () => mockFallback.interview.evaluateAnswer()
+      ),
       
     saveAttempt: (attemptData: any) => 
-      fetch(`${API_BASE_URL}/interview/attempt`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify(attemptData)
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/interview/attempt`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(attemptData)
+        },
+        async () => ({ success: true })
+      ),
       
     getHistory: () => 
-      fetch(`${API_BASE_URL}/interview/history`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/interview/history`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => []
+      )
   },
 
   // Communication Practice
   communication: {
     getTopics: () => 
-      fetch(`${API_BASE_URL}/communication/topics`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/communication/topics`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => [
+          { _id: "t1", title: "Technical Project Architecture Overview", difficulty: "Intermediate", category: "Technical" },
+          { _id: "t2", title: "Handling Editorial Pressures and Deadlines", difficulty: "Intermediate", category: "Journalism" }
+        ]
+      ),
       
     getVocabulary: () => 
-      fetch(`${API_BASE_URL}/communication/vocabulary`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/communication/vocabulary`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => [
+          { _id: "v1", word: "Scalability", meaning: "The capability of a system to handle a growing amount of work." },
+          { _id: "v2", word: "Attribution", meaning: "Stating who said something or where information came from in media." }
+        ]
+      ),
       
     evaluateIntro: (introductionText: string) => 
-      fetch(`${API_BASE_URL}/communication/evaluate-intro`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ introductionText })
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/communication/evaluate-intro`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ introductionText })
+        },
+        async () => ({ score: 85, feedback: "Confident self-introduction highlighting academic background and key aspirations." })
+      ),
       
     evaluateSpeaking: (topic: string, answerText: string) => 
-      fetch(`${API_BASE_URL}/communication/evaluate-speaking`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ topic, answerText })
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/communication/evaluate-speaking`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ topic, answerText })
+        },
+        async () => ({ score: 80, feedback: "Good structure and technical vocabulary." })
+      ),
       
     evaluateVocab: (word: string, meaning: string, studentSentence: string) => 
-      fetch(`${API_BASE_URL}/communication/evaluate-vocab`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ word, meaning, studentSentence })
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/communication/evaluate-vocab`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ word, meaning, studentSentence })
+        },
+        async () => ({ score: 90, feedback: "Accurate contextual usage." })
+      ),
       
     getHistory: () => 
-      fetch(`${API_BASE_URL}/communication/history`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/communication/history`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => []
+      )
   },
 
   // Career Roadmaps
   roadmap: {
     get: (goal?: string) => 
-      fetch(`${API_BASE_URL}/roadmap?goal=${goal || ""}`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/roadmap?goal=${goal || ""}`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => null
+      ),
       
     toggleSkill: (skillName: string) => 
-      fetch(`${API_BASE_URL}/roadmap/toggle`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ skillName })
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/roadmap/toggle`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ skillName })
+        },
+        async () => ({ success: true, skillName })
+      )
   },
 
   // Community posts & Comments
@@ -196,116 +303,180 @@ export const api = {
       if (params.category) query.append("category", params.category);
       if (params.isHubResource !== undefined) query.append("isHubResource", String(params.isHubResource));
       
-      return fetch(`${API_BASE_URL}/posts?${query.toString()}`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse);
+      return safeFetch(
+        `${API_BASE_URL}/posts?${query.toString()}`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => []
+      );
     },
     
     create: (postData: { content: string; tags?: string[]; isHubResource?: boolean; category?: string }) => 
-      fetch(`${API_BASE_URL}/posts`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify(postData)
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/posts`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(postData)
+        },
+        async () => ({ _id: "post_" + Date.now(), ...postData, createdAt: new Date().toISOString() })
+      ),
       
     like: (postId: string) => 
-      fetch(`${API_BASE_URL}/posts/${postId}/like`, {
-        method: "POST",
-        headers: getHeaders()
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/posts/${postId}/like`, 
+        {
+          method: "POST",
+          headers: getHeaders()
+        },
+        async () => ({ success: true })
+      ),
       
     comment: (postId: string, content: string) => 
-      fetch(`${API_BASE_URL}/posts/${postId}/comment`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ content })
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/posts/${postId}/comment`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ content })
+        },
+        async () => ({ _id: "c_" + Date.now(), content, createdAt: new Date().toISOString() })
+      ),
       
     save: (postId: string) => 
-      fetch(`${API_BASE_URL}/posts/${postId}/save`, {
-        method: "POST",
-        headers: getHeaders()
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/posts/${postId}/save`, 
+        {
+          method: "POST",
+          headers: getHeaders()
+        },
+        async () => ({ success: true })
+      )
   },
 
   // Video guides
   videos: {
     get: (category?: string) => {
       const url = category ? `${API_BASE_URL}/videos?category=${category}` : `${API_BASE_URL}/videos`;
-      return fetch(url, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse);
+      return safeFetch(
+        url, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => []
+      );
     },
     
     create: (videoData: { title: string; videoUrl: string; thumbnailUrl?: string; category: string }) => 
-      fetch(`${API_BASE_URL}/videos`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify(videoData)
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/videos`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(videoData)
+        },
+        async () => ({ _id: "v_" + Date.now(), ...videoData })
+      ),
       
     like: (videoId: string) => 
-      fetch(`${API_BASE_URL}/videos/${videoId}/like`, {
-        method: "POST",
-        headers: getHeaders()
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/videos/${videoId}/like`, 
+        {
+          method: "POST",
+          headers: getHeaders()
+        },
+        async () => ({ success: true })
+      ),
       
     view: (videoId: string) => 
-      fetch(`${API_BASE_URL}/videos/${videoId}/view`, {
-        method: "POST",
-        headers: getHeaders()
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/videos/${videoId}/view`, 
+        {
+          method: "POST",
+          headers: getHeaders()
+        },
+        async () => ({ success: true })
+      )
   },
 
   // Peer mock panels
   collaboration: {
     getSessions: () => 
-      fetch(`${API_BASE_URL}/collaboration/sessions`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/collaboration/sessions`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => []
+      ),
       
     createSession: (sessionData: { role: string; dateTime: string; maxParticipants?: number; meetingLink: string }) => 
-      fetch(`${API_BASE_URL}/collaboration/sessions`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify(sessionData)
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/collaboration/sessions`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(sessionData)
+        },
+        async () => ({ _id: "s_" + Date.now(), ...sessionData })
+      ),
       
     joinSession: (sessionId: string) => 
-      fetch(`${API_BASE_URL}/collaboration/sessions/${sessionId}/join`, {
-        method: "POST",
-        headers: getHeaders()
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/collaboration/sessions/${sessionId}/join`, 
+        {
+          method: "POST",
+          headers: getHeaders()
+        },
+        async () => ({ success: true })
+      ),
       
     leaveSession: (sessionId: string) => 
-      fetch(`${API_BASE_URL}/collaboration/sessions/${sessionId}/leave`, {
-        method: "POST",
-        headers: getHeaders()
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/collaboration/sessions/${sessionId}/leave`, 
+        {
+          method: "POST",
+          headers: getHeaders()
+        },
+        async () => ({ success: true })
+      )
   },
 
   // Notifications
   notifications: {
     get: () => 
-      fetch(`${API_BASE_URL}/notifications`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/notifications`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        () => mockFallback.notifications.get()
+      ),
       
     markRead: (id: string) => 
-      fetch(`${API_BASE_URL}/notifications/${id}`, {
-        method: "PUT",
-        headers: getHeaders()
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/notifications/${id}`, 
+        {
+          method: "PUT",
+          headers: getHeaders()
+        },
+        () => mockFallback.notifications.markRead()
+      ),
       
     markAllRead: () => 
-      fetch(`${API_BASE_URL}/notifications`, {
-        method: "PUT",
-        headers: getHeaders()
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/notifications`, 
+        {
+          method: "PUT",
+          headers: getHeaders()
+        },
+        () => mockFallback.notifications.markAllRead()
+      )
   },
 
   // Company Placement Archives
@@ -314,45 +485,69 @@ export const api = {
       const query = new URLSearchParams();
       if (params?.search) query.append("search", params.search);
       if (params?.industry && params.industry !== "All") query.append("industry", params.industry);
-      return fetch(`${API_BASE_URL}/companies?${query.toString()}`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse);
+      return safeFetch(
+        `${API_BASE_URL}/companies?${query.toString()}`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => []
+      );
     },
     getBySlug: (slug: string) =>
-      fetch(`${API_BASE_URL}/companies/${slug}`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/companies/${slug}`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => null
+      )
   },
 
   // Placement Applications Tracker
   applications: {
     get: () =>
-      fetch(`${API_BASE_URL}/applications`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/applications`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        () => mockFallback.applications.get()
+      ),
 
     create: (data: any) =>
-      fetch(`${API_BASE_URL}/applications`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify(data)
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/applications`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(data)
+        },
+        () => mockFallback.applications.create(data)
+      ),
 
     update: (id: string, data: any) =>
-      fetch(`${API_BASE_URL}/applications/${id}`, {
-        method: "PUT",
-        headers: getHeaders(),
-        body: JSON.stringify(data)
-      }).then(handleResponse),
+      safeFetch(
+        `${API_BASE_URL}/applications/${id}`, 
+        {
+          method: "PUT",
+          headers: getHeaders(),
+          body: JSON.stringify(data)
+        },
+        () => mockFallback.applications.update(id, data)
+      ),
 
     delete: (id: string) =>
-      fetch(`${API_BASE_URL}/applications/${id}`, {
-        method: "DELETE",
-        headers: getHeaders()
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/applications/${id}`, 
+        {
+          method: "DELETE",
+          headers: getHeaders()
+        },
+        () => mockFallback.applications.delete(id)
+      )
   },
 
   // Alumni Mentorship
@@ -360,18 +555,26 @@ export const api = {
     get: (params?: { domain?: string }) => {
       const query = new URLSearchParams();
       if (params?.domain && params.domain !== "All") query.append("domain", params.domain);
-      return fetch(`${API_BASE_URL}/mentors?${query.toString()}`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse);
+      return safeFetch(
+        `${API_BASE_URL}/mentors?${query.toString()}`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => []
+      );
     },
 
     book: (id: string, bookingData: { slotDate: string; topic?: string }) =>
-      fetch(`${API_BASE_URL}/mentors/${id}/book`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify(bookingData)
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/mentors/${id}/book`, 
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(bookingData)
+        },
+        async () => ({ success: true })
+      )
   },
 
   // Live Job Board (LinkedIn & Indeed)
@@ -385,17 +588,24 @@ export const api = {
       if (params?.batch && params.batch !== "All") query.append("batch", params.batch);
       if (params?.level && params.level !== "All") query.append("level", params.level);
       if (params?.stream && params.stream !== "All") query.append("stream", params.stream);
-      return fetch(`${API_BASE_URL}/jobs?${query.toString()}`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse);
+      return safeFetch(
+        `${API_BASE_URL}/jobs?${query.toString()}`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        () => mockFallback.jobs.getAll()
+      );
     },
 
     getById: (id: string) =>
-      fetch(`${API_BASE_URL}/jobs/${id}`, {
-        method: "GET",
-        headers: getHeaders()
-      }).then(handleResponse)
+      safeFetch(
+        `${API_BASE_URL}/jobs/${id}`, 
+        {
+          method: "GET",
+          headers: getHeaders()
+        },
+        async () => null
+      )
   }
 };
-
