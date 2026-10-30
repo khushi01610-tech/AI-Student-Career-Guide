@@ -64,11 +64,25 @@ export const aiService = {
     let rawText = directText || "";
     if (!rawText && fileBuffer) {
       try {
-        const pdfParse = require("pdf-parse");
-        const parsed = await pdfParse(fileBuffer);
-        rawText = parsed.text || "";
+        const pdfParsePkg = require("pdf-parse");
+        if (pdfParsePkg && pdfParsePkg.PDFParse) {
+          const parser = new pdfParsePkg.PDFParse({ data: fileBuffer });
+          const resParsed = await parser.getText();
+          rawText = resParsed?.text || "";
+          if (typeof parser.destroy === "function") {
+            await parser.destroy();
+          }
+        } else if (typeof pdfParsePkg === "function") {
+          const parsed = await pdfParsePkg(fileBuffer);
+          rawText = parsed?.text || "";
+        } else if (pdfParsePkg?.default && typeof pdfParsePkg.default === "function") {
+          const parsed = await pdfParsePkg.default(fileBuffer);
+          rawText = parsed?.text || "";
+        }
       } catch (err) {
         console.warn("pdf-parse extraction failed, attempting ascii decode fallback:", err);
+      }
+      if (!rawText) {
         rawText = fileBuffer.toString("utf-8").replace(/[^\x20-\x7E\n]/g, " ");
       }
     }

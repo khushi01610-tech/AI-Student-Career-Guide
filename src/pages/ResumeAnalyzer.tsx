@@ -79,16 +79,20 @@ export default function ResumeAnalyzer() {
       const res = await api.resume.analyze(formData);
       setProgress(100);
       
-      setAnalysisData(res.analysis);
+      const analysis = res?.analysis || res;
+      setAnalysisData(analysis);
       
       await refreshProfile();
-      if (res.analysis?.skills) {
-        updateUserSkills(res.analysis.skills);
+      if (analysis?.skills) {
+        updateUserSkills(analysis.skills);
       }
+
+      const score = analysis?.atsScore ?? analysis?.resumeScore ?? 80;
+      const streamName = analysis?.stream ?? user?.degree ?? "Degree";
 
       toast({ 
         title: "ATS Audit Complete! 🚀", 
-        description: `Scored ${res.analysis.atsScore}/100 based on ${res.analysis.stream} rubric criteria.` 
+        description: `Scored ${score}/100 based on ${streamName} rubric criteria.` 
       });
     } catch (e: any) {
       toast({

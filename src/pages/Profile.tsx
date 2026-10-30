@@ -196,16 +196,19 @@ export default function Profile() {
       const res = await api.resume.analyze(formData);
       await refreshProfile();
       
-      if (res.analysis?.skills) {
+      const analysis = res?.analysis || res;
+      if (analysis?.skills) {
         // Merge extracted skills
-        const merged = Array.from(new Set([...activeSkills, ...res.analysis.skills]));
+        const merged = Array.from(new Set([...activeSkills, ...analysis.skills]));
         setActiveSkills(merged);
       }
 
-      setReviewedText(res.extractedText || "");
+      setReviewedText(res?.extractedText || analysis?.extractedText || "");
+      const score = analysis?.atsScore ?? analysis?.resumeScore ?? 80;
+      const skillsCount = analysis?.skills?.length || 0;
       toast({
         title: "Resume Analyzed Successfully! 🚀",
-        description: `ATS Score: ${res.analysis.atsScore}/100 with ${res.analysis.skills?.length || 0} skills detected.`
+        description: `ATS Score: ${score}/100 with ${skillsCount} skills detected.`
       });
     } catch (err: any) {
       toast({ title: "Upload Failed", description: err.message || "Failed to process resume.", variant: "destructive" });

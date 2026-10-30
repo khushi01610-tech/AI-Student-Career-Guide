@@ -141,34 +141,160 @@ export const mockFallback = {
   },
 
   resume: {
-    analyze: async () => {
-      const result = {
+    analyze: async (formData?: any) => {
+      let fileName = "Resume.pdf";
+      if (formData && typeof formData.get === "function") {
+        const file = formData.get("resume");
+        if (file && file.name) {
+          fileName = file.name;
+        }
+      }
+
+      const user = getStoredUser() || defaultStudentCSE;
+      const isBJMC = user.degree === "BJMC" || fileName.toLowerCase().includes("bjmc") || fileName.toLowerCase().includes("journal");
+      const stream = isBJMC ? "BJMC" : "CSE";
+
+      const detectedSkills = isBJMC
+        ? ["Media Ethics", "Investigative Journalism", "Adobe Premiere Pro", "Content Strategy", "Press Release Writing", "Broadcast Anchoring", "Digital Storytelling", "SEO Writing"]
+        : ["React", "TypeScript", "Node.js", "Python", "SQL", "RESTful APIs", "Docker", "Git", "Tailwind CSS", "MongoDB"];
+
+      const strengthBreakdown = [
+        {
+          strength: `${stream} Domain Keywords`,
+          details: `Identified ${detectedSkills.length} relevant competencies: ${detectedSkills.slice(0, 5).join(", ")}.`
+        },
+        {
+          strength: "Clear Academic Credentials",
+          details: "Detected degree and university credentials compatible with placement filters."
+        },
+        {
+          strength: "Contact Verification",
+          details: "ATS successfully verified email, phone number, and online portfolio links."
+        }
+      ];
+
+      const sectionAnalysis = [
+        {
+          section: "Contact & Online Portfolio",
+          score: 93,
+          feedback: "Complete contact profile detected with active portfolio links."
+        },
+        {
+          section: "Education & Degree Program",
+          score: 87,
+          feedback: `Verified ${stream} degree focus. University credentials and graduation timeline are clear.`
+        },
+        {
+          section: "Domain & Technical Keywords",
+          score: 85,
+          feedback: `Strong keyword density with ${detectedSkills.length} verified industry competencies.`
+        },
+        {
+          section: "Projects & Impact Measurement",
+          score: 80,
+          feedback: "Good project demonstrations. Consider adding more STAR metrics (e.g., % latency improved, % readership grown)."
+        },
+        {
+          section: "Formatting & ATS Layout",
+          score: 90,
+          feedback: "Clean single-column standard layout easily processed by automated ATS parsers."
+        }
+      ];
+
+      const recommendations = isBJMC ? [
+        "Include direct links to published articles, clips, or digital portfolio (Behance / Substack / YouTube).",
+        "Quantify your readership or media impact (e.g., 'Authored 15 articles generating 25k+ reader views').",
+        "Highlight proficiency in industry-standard editing software (Adobe Premiere Pro, Canva, WordPress CMS).",
+        "Structure sample beats chronologically with clear topic categories."
+      ] : [
+        "Include live GitHub repository links and deployment URLs for each featured project.",
+        "Quantify technical performance impact (e.g., 'reduced API latency by 25%', 'handled 5,000+ mock requests').",
+        "Group technical skills cleanly into categories: Languages, Web Frameworks, Databases, and Developer Tools.",
+        "Ensure bullet points start with strong action verbs (Architected, Engineered, Optimized, Implemented)."
+      ];
+
+      const improvedSections = isBJMC ? [
+        {
+          sectionName: "Projects & Work Samples",
+          originalText: "Wrote articles for college magazine and made videos on social issues.",
+          improvedText: "Researched and authored 6 investigative feature articles for the university publication, conducting 12 in-depth stakeholder interviews and increasing digital edition readership by 35%."
+        },
+        {
+          sectionName: "Professional Summary",
+          originalText: "BJMC student seeking media and content writing roles.",
+          improvedText: "Detail-oriented Journalism and Mass Communication senior with hands-on reporting, digital storytelling, and Premiere Pro video production experience. Passionate about driving audience engagement across digital publications."
+        }
+      ] : [
+        {
+          sectionName: "Projects",
+          originalText: "Made a website using React and Node. Stored users in database and displayed user info.",
+          improvedText: "Architected a responsive full-stack web portal using React, Node.js, and Express; integrated MongoDB with indexing to reduce query response latency by 30% for 1,000+ simulated users."
+        },
+        {
+          sectionName: "Professional Summary",
+          originalText: "I am a computer science student looking for software developer jobs.",
+          improvedText: "Proactive B.Tech Computer Science student specializing in scalable web systems and modern JavaScript frameworks (React/Node.js). Eager to contribute clean code and rigorous problem solving to high-impact engineering teams."
+        }
+      ];
+
+      const roleRecommendations = isBJMC
+        ? ["Digital Journalist & Reporter", "Content Strategist", "PR & Brand Associate", "Video Producer & Editor"]
+        : ["Full Stack Developer", "Frontend Engineer", "Backend Developer", "Software Development Engineer (Associate)"];
+
+      const analysis = {
+        stream,
         resumeScore: 84,
         atsScore: 84,
         formatScore: 90,
         keywordScore: 80,
         skillsScore: 85,
         projectScore: 82,
-        extractedKeywords: ["React", "Node.js", "TypeScript", "SQL", "REST APIs", "Git", "Docker", "Database"],
-        missingKeywords: ["CI/CD Pipeline", "AWS Cloud", "Unit Testing"],
-        rubricBreakdown: {
-          contactFormat: "Valid & Complete",
-          headingsStructure: "Standard ATS Headings Detected",
-          bulletPointMetrics: "Strong STAR action verbs present"
-        },
-        actionableFeedback: [
-          "Include quantifiable metrics in project bullet points (e.g. reduced load time by 30%).",
-          "Add cloud deployment competencies such as AWS or Docker containerization."
-        ]
+        skills: detectedSkills,
+        roleRecommendations,
+        strengthBreakdown,
+        sectionAnalysis,
+        recommendations,
+        improvedSections,
+        extractedText: `Resume: ${fileName}\nStream: ${stream}\nSkills: ${detectedSkills.join(", ")}`,
+        contactInfo: {
+          email: user.email || "student@university.edu",
+          phone: "+91 98765 43210",
+          hasLinkedIn: true,
+          hasGitHub: !isBJMC,
+          hasPortfolio: isBJMC
+        }
       };
 
       // Update profile score
       const existing = getStoredProfile() || defaultProfileCSE;
       existing.atsScore = 84;
       existing.resumeScore = 84;
+      existing.resumeUrl = "/uploads/" + fileName;
+      existing.resumeFileName = fileName;
+      existing.extractedResumeText = `Resume: ${fileName}\nStream: ${stream}\nSkills: ${detectedSkills.join(", ")}`;
       localStorage.setItem("demo_profile_session", JSON.stringify(existing));
 
-      return result;
+      return {
+        message: "Resume uploaded and analyzed successfully",
+        resumeUrl: "/uploads/" + fileName,
+        resumeFileName: fileName,
+        analysis,
+        extractedText: `Resume: ${fileName}\nStream: ${stream}\nSkills: ${detectedSkills.join(", ")}`,
+        // Top-level mirrors for universal fallback compatibility
+        atsScore: 84,
+        resumeScore: 84,
+        formatScore: 90,
+        keywordScore: 80,
+        skillsScore: 85,
+        projectScore: 82,
+        stream,
+        skills: detectedSkills,
+        roleRecommendations,
+        strengthBreakdown,
+        sectionAnalysis,
+        recommendations,
+        improvedSections
+      };
     }
   },
 

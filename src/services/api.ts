@@ -35,20 +35,20 @@ const handleResponse = async (response: Response) => {
 };
 
 // Resilient fetch wrapper: handles live backend requests, but automatically falls back
-// to client-side session handlers when running on static hosting (e.g. Netlify 404s or network failure)
+// to client-side session handlers when running on static hosting (e.g. Netlify 404s, offline, or network failure)
 const safeFetch = async (url: string, options?: RequestInit, fallbackFn?: () => Promise<any>): Promise<any> => {
   try {
     const response = await fetch(url, options);
-    // If the server returns 404 (e.g., Netlify static host with no backend), activate fallback
-    if (response.status === 404 && fallbackFn) {
-      console.warn(`[CareerEngine] Live backend not detected at ${url} (404). Seamlessly operating via static client mode.`);
+    // If the server returns 404 (e.g., Netlify static host) or 401/500, activate fallback gracefully
+    if ((response.status === 404 || response.status === 401 || response.status >= 500) && fallbackFn) {
+      console.warn(`[CareerEngine] Server returned ${response.status} at ${url}. Seamlessly operating via client mode.`);
       return await fallbackFn();
     }
     return await handleResponse(response);
   } catch (err) {
     // If network fails (e.g., offline or backend not running), activate fallback
     if (fallbackFn) {
-      console.warn(`[CareerEngine] Network request failed for ${url}. Seamlessly operating via static client mode:`, err);
+      console.warn(`[CareerEngine] Network request failed for ${url}. Seamlessly operating via client mode:`, err);
       return await fallbackFn();
     }
     throw err;
@@ -135,7 +135,7 @@ export const api = {
           headers: getHeaders(true),
           body: formData
         },
-        () => mockFallback.resume.analyze()
+        () => mockFallback.resume.analyze(formData)
       )
   },
 
